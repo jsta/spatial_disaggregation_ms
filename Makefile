@@ -1,39 +1,13 @@
-.PHONY: data figures tables manuscript all
+.PHONY: all figures data
 
-all: data figures tables
+all: data figures
 
-data: data/iris.csv
+data: data/gis.gpkg
 
-data/iris.csv: scripts/00_get_iris.R
+data/gis.gpkg: scripts/00_get_gis.R
 	Rscript $<
 
-figures: data manuscript/figures.pdf manuscript/appendix.pdf
+figures: data figures/size_comparison.pdf
 
-manuscript/figures.pdf: manuscript/figures.Rmd figures/01_iris-1.pdf
-	Rscript -e "rmarkdown::render('$<', output_format = 'pdf_document')"
-	-pdftk manuscript/figures.pdf cat 2-end output manuscript/figures2.pdf
-	-mv manuscript/figures2.pdf manuscript/figures.pdf
-
-figures/01_iris-1.pdf: figures/01_iris.Rmd
-	Rscript -e "rmarkdown::render('$<', output_format = 'pdf_document')"
-
-manuscript/appendix.pdf: manuscript/appendix.Rmd figures/A1_iris-1.pdf
-	Rscript -e "rmarkdown::render('$<', output_format = 'pdf_document')"
-	-pdftk manuscript/appendix.pdf cat 2-end output manuscript/appendix2.pdf
-	-mv manuscript/appendix2.pdf manuscript/appendix.pdf
-
-figures/A1_iris-1.pdf: figures/A1_iris.Rmd
-	Rscript -e "rmarkdown::render('$<', output_format = 'pdf_document')"
-
-tables: data manuscript/tables.pdf
-
-manuscript/tables.pdf: tables/01_iris_table.pdf
-	pdftk $^ cat output manuscript/tables.pdf
-
-tables/01_iris_table.pdf: tables/01_iris_table.Rmd
-	Rscript -e "rmarkdown::render('$<', output_format = 'pdf_document')"
-
-manuscript: manuscript/draft.pdf
-
-manuscript/draft.pdf: manuscript/draft.md
-	cd manuscript && make all
+figures/size_comparison.pdf: scripts/03_viz.R
+	Rscript $<
