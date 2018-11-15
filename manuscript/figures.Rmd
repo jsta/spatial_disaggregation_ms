@@ -1,0 +1,15 @@
+---
+title: "Figures"
+output:
+  pdf_document:
+    fig_caption: yes
+    keep_tex: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.path = "../figures/", fig.width = 5, fig.height = 6, fig.align='center', dev = c("pdf"))
+```
+
+```{r size_comparison, fig.cap="Cross-scale unit area comparison ", echo=FALSE, out.height = "4in"}
+knitr::include_graphics("../figures/size_comparison.pdf")
+```
