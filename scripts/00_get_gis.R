@@ -29,8 +29,13 @@ hu8s <- LAGOSextra::query_gis("HU8", "ZoneID", hu8s)
 
 # unlink("data/gis.gpkg")
 # st_layers("data/gis.gpkg")
-st_write(states, "data/gis.gpkg", layer = "states")
-st_write(hu4s, "data/gis.gpkg", layer = "hu4s", update = TRUE)
-st_write(hu8s, "data/gis.gpkg", layer = "hu8s", update = TRUE)
-st_write(counties, "data/gis.gpkg", layer = "counties", update = TRUE)
-st_write(iws, "data/gis.gpkg", layer = "iws", update = TRUE)
+gpkg_path <- "data/gis.gpkg"
+st_write(states, gpkg_path, layer = "states", layer_options = c("OVERWRITE=yes"))
+st_write(hu4s, gpkg_path, layer = "hu4s", update = TRUE,
+         layer_options = c("OVERWRITE=yes"))
+st_write(hu8s, gpkg_path, layer = "hu8s", update = TRUE,
+         layer_options = c("OVERWRITE=yes"))
+st_write(counties, gpkg_path, layer = "counties", update = TRUE,
+         layer_options = c("OVERWRITE=yes"))
+st_write(iws, gpkg_path, layer = "iws", update = TRUE,
+         layer_options = c("OVERWRITE=yes"))
