@@ -1,19 +1,17 @@
 
 # ---- source_utils ----
 
-library(dplyr)
+suppressMessages(library(dplyr))
 library(ggplot2)
 library(sf)
 library(LAGOSextra)
 library(LAGOSNE)
 library(lwgeom)
 
-theme_pred <- function(){
-  theme(legend.position = "na",
-        axis.text = element_text(size = 10),
-        axis.title = element_text(size = 12),
-        plot.title = element_text(size = 10, face = "bold", color = "black", hjust = 0))
-}
+theme_opts <- theme(axis.text = element_blank(),
+                    axis.ticks = element_blank(),
+                    panel.background = element_blank())
+                    # plot.margin = unit(c(0, 0, -2, 0), "cm")) # t, r, b, l
 
 signif_star <- function(x){
   if(!is.na(x)){

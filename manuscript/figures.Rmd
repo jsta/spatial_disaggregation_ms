@@ -10,6 +10,9 @@ output:
 knitr::opts_chunk$set(echo = TRUE, fig.path = "../figures/", fig.width = 5, fig.height = 6, fig.align='center', dev = c("pdf"))
 ```
 
-```{r size_comparison, fig.cap="Cross-scale unit area comparison ", echo=FALSE, out.height = "4in"}
-knitr::include_graphics("../figures/size_comparison.pdf")
+```{r size_comparison, fig.cap="Cross-scale unit area comparison", echo=FALSE, out.height = "4in"}
+knitr::include_graphics("../figures/01_size-comparison-1.pdf")
 ```
+
+```{r tillage_map, fig.cap="Tillage map", echo=FALSE, out.height = "4in"}
+knitr::include_graphics("../figures/02_tillage_map-1.pdf")

@@ -1,0 +1,48 @@
+---
+title: "Figures"
+output:
+  pdf_document:
+    fig_caption: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.path = "../figures/", fig.width = 5, fig.height = 6)
+```
+
+```{r read_chunks, cache=FALSE, echo=FALSE}
+knitr::read_chunk("../scripts/99_utils.R")
+```
+
+```{r source_utils, message=FALSE, results='hide', echo=FALSE, warning=FALSE}
+
+```
+
+```{r 02_tillage_map, echo=FALSE, warning=FALSE, fig.width = 5.5, fig.height = 3}
+# ---- tillage_map ----
+library(macroag)
+
+data("tillage_ctic")
+gpkg_path <- "../data/gis.gpkg"
+hu8s      <- st_read(gpkg_path, layer = "hu8s")
+states    <- st_read(gpkg_path, layer = "states")
+lg        <- lagosne_load()
+
+tc <- dplyr::filter(tillage_ctic, huc8_n %in% as.character(hu8s$HUC8)) %>%
+    left_join(dplyr::select(lg$hu8, hu8, hu8_zoneid),
+            by = c("huc8_n" = "hu8")) %>%
+  dplyr::filter(year == 2004 & crop == "allcrops")
+
+hu8s <- dplyr::left_join(hu8s, tc, by = c("ZoneID" = "hu8_zoneid"))
+
+ggplot() +
+  geom_sf(data = states) +
+  geom_sf(data = hu8s, aes(fill = pctnotil)) +
+  coord_sf(datum = NA) +
+  theme_opts
+
+# data("tillage_ctic")
+#
+#
+# plot(tillage_ctic$totacre, tillage_ctic$notill)
+# abline(0, 1)
+```
