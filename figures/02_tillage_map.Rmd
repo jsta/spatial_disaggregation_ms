@@ -27,26 +27,45 @@ data("tillage_ctic")
 gpkg_path <- "../data/gis.gpkg"
 hu8s      <- st_read(gpkg_path, layer = "hu8s")
 states    <- st_read(gpkg_path, layer = "states")
+counties  <- st_read(gpkg_path, layer = "counties")
 lg        <- lagosne_load()
+
+n_cat  <- 4
+colors <- c("red", "yellow", "blue", "green")
+break_cuts <- c(0, 10, 25, 50, 100)
 
 tc <- dplyr::filter(tillage_ctic, huc8_n %in% as.character(hu8s$HUC8)) %>%
     left_join(dplyr::select(lg$hu8, hu8, hu8_zoneid),
             by = c("huc8_n" = "hu8")) %>%
   dplyr::filter(year == 2004 & crop == "allcrops")
-
 hu8s <- dplyr::left_join(hu8s, tc, by = c("ZoneID" = "hu8_zoneid"))
-
-n_cat  <- 4
-colors <- c("red", "yellow", "blue", "green")
 hu8s    <- mutate(hu8s, 
-                 pctnotil_cat = cut(hu8s$pctnotil, breaks = c(0, 10, 25, 50, 100)))
+                 pctnotil_cat = cut(hu8s$pctnotil, breaks = break_cuts))
 
-ggplot() +
-  geom_sf(data = hu8s, aes(fill = pctnotil_cat)) +
+counties <- st_transform(counties, st_crs(hu8s))
+counties <- st_cast(counties, "MULTIPOLYGON")
+counties <- sf::st_interpolate_aw(hu8s["pctnotil"], counties, extensive = FALSE)
+counties <- mutate(counties,
+                   pctnotil_cat = cut(counties$pctnotil, breaks = break_cuts))
+
+g_hu8 <- ggplot() +
+  geom_sf(data = hu8s, aes(fill = pctnotil_cat), size = 0.2) +
   scale_fill_manual(values = colors, levels(hu8s$pctnotil_cat)) + 
-  geom_sf(data = states, alpha = 0) +
+  geom_sf(data = states, alpha = 0, size = 0.5) +
   coord_sf(datum = NA) +
   theme_opts
+g_counties <- ggplot() +
+  geom_sf(data = counties, aes(fill = pctnotil_cat), size = 0.2) +
+  scale_fill_manual(values = colors, levels(counties$pctnotil_cat)) +
+  geom_sf(data = states, alpha = 0, size = 0.5) +
+  coord_sf(datum = NA) +
+  theme_opts
+legend <- get_legend(g_hu8)
+
+plot_grid(g_hu8 + theme(legend.position = "none"), 
+          g_counties + theme(legend.position = "none"), 
+          legend, 
+          nrow = 1, ncol = 3)
 
 # data("tillage_ctic")
 #
