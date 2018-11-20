@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE, fig.path = "../figures/", fig.width = 5, fig.
 ```
 
 ```{r read_chunks, cache=FALSE, echo=FALSE}
+# source("scripts/99_utils.R")
 knitr::read_chunk("../scripts/99_utils.R")
 ```
 
@@ -22,6 +23,7 @@ knitr::read_chunk("../scripts/99_utils.R")
 library(macroag)
 
 data("tillage_ctic")
+# setwd("scripts")
 gpkg_path <- "../data/gis.gpkg"
 hu8s      <- st_read(gpkg_path, layer = "hu8s")
 states    <- st_read(gpkg_path, layer = "states")
@@ -34,9 +36,15 @@ tc <- dplyr::filter(tillage_ctic, huc8_n %in% as.character(hu8s$HUC8)) %>%
 
 hu8s <- dplyr::left_join(hu8s, tc, by = c("ZoneID" = "hu8_zoneid"))
 
+n_cat  <- 4
+colors <- c("red", "yellow", "blue", "green")
+hu8s    <- mutate(hu8s, 
+                 pctnotil_cat = cut(hu8s$pctnotil, breaks = c(0, 10, 25, 50, 100)))
+
 ggplot() +
-  geom_sf(data = states) +
-  geom_sf(data = hu8s, aes(fill = pctnotil)) +
+  geom_sf(data = hu8s, aes(fill = pctnotil_cat)) +
+  scale_fill_manual(values = colors, levels(hu8s$pctnotil_cat)) + 
+  geom_sf(data = states, alpha = 0) +
   coord_sf(datum = NA) +
   theme_opts
 

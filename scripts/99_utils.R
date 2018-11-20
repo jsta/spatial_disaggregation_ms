@@ -7,6 +7,9 @@ library(sf)
 library(LAGOSextra)
 library(LAGOSNE)
 library(lwgeom)
+library(classInt)
+library(tidyr)
+library(stringr)
 
 theme_opts <- theme(axis.text = element_blank(),
                     axis.ticks = element_blank(),

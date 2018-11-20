@@ -1,31 +1,46 @@
+# setwd("../")
 source("scripts/99_utils.R")
 # source("01_prepdata.R")
 
 # ---- size_comparison ----
+lg   <- lagosne_load()
 
 ep <- readRDS("~/Documents/Science/JournalSubmissions/lagos_ag/data/ep.rds") %>%
   st_as_sf(coords = c("nhd_long", "nhd_lat"), crs = 4326)
 
+state_codes <- c("IL", "IN", "IA",
+                 "MI", "MN", "MO",
+                 "NY", "OH", "PA", "WI")
 states <- state_sf() %>%
-  dplyr::filter(., ABB %in% c("IL", "IN", "IA",
-                              "MI", "MN", "MO",
-                              "NY", "OH", "PA", "WI"))
+  dplyr::filter(., ABB %in% state_codes)
 
 counties <- county_sf() %>%
   dplyr::filter(unlist(lapply(st_intersects(., states),
                               function(x) length(x) > 0)))
 
-hu4s <- LAGOSextra::query_gis("HU4", "ZoneID",
-                              c("HU4_47","HU4_44","HU4_45","HU4_48","HU4_38","HU4_37","HU4_32","HU4_35","HU4_30","HU4_40","HU4_39","HU4_25","HU4_49","HU4_53","HU4_29","HU4_55","HU4_59","HU4_57","HU4_27","HU4_33","HU4_34","HU4_56","HU4_36","HU4_60","HU4_61","HU4_50","HU4_18","HU4_42","HU4_23","HU4_17","HU4_46","HU4_51","HU4_41","HU4_63","HU4_62","HU4_65","HU4_64","HU4_68","HU4_16","HU4_43"))
+# use LAGOSNE to pull hu ids that correspond to states
+# lg <- lagosne_load()
+# pad states with NA to 10 characters
+hu4_zones <- lg$hu4 %>%
+  mutate(hu4_states = gsub("  ", "NA", sprintf("%-10s", hu4_states, "NA"))) %>%
+  tidyr::separate(hu4_states, into = paste0("state_", 1:5), sep = seq(2, 8, 2)) %>%
+  dplyr::select(starts_with("state"), hu4_zoneid) %>%
+  tidyr::gather(key = "state", value = "value", -hu4_zoneid) %>%
+  dplyr::filter(value %in% state_codes) %>%
+  distinct(hu4_zoneid)
 
-iws <- LAGOSextra::query_gis("IWS", "lagoslakeid", ep$lagoslakeid)
+hu4s <- LAGOSextra::query_gis("HU4", "ZoneID", hu4_zones$hu4_zoneid)
+iws  <- LAGOSextra::query_gis("IWS", "lagoslakeid", ep$lagoslakeid)
 
-lg   <- lagosne_load()
-hu8s <- dplyr::filter(dplyr::select(lg$locus, hu8_zoneid, lagoslakeid),
-                      lagoslakeid %in% ep$lagoslakeid) %>%
-  dplyr::select("hu8_zoneid") %>%
-  .$hu8_zoneid
-hu8s <- LAGOSextra::query_gis("HU8", "ZoneID", hu8s)
+hu8_zones <- lg$hu8 %>%
+  mutate(hu8_states = gsub("  ", "NA", sprintf("%-8s", hu8_states, "NA"))) %>%
+  tidyr::separate(hu8_states, into = paste0("state_", 1:4), sep = seq(2, 6, 2)) %>%
+  dplyr::select(starts_with("state"), hu8_zoneid) %>%
+  tidyr::gather(key = "state", value = "value", -hu8_zoneid) %>%
+  dplyr::filter(value %in% state_codes) %>%
+  distinct(hu8_zoneid)
+
+hu8s <- LAGOSextra::query_gis("HU8", "ZoneID", hu8_zones$hu8_zoneid)
 
 # unlink("data/gis.gpkg")
 # st_layers("data/gis.gpkg")
