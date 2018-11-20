@@ -19,6 +19,8 @@ knitr::read_chunk("../scripts/99_utils.R")
 
 ```{r 01_size-comparison, echo=FALSE, warning=FALSE, fig.width = 5.5, fig.height = 3, message=FALSE}
 # ---- size_comparison ----
+# source("scripts/99_utils.R")
+# setwd("scripts")
 gpkg_path <- "../data/gis.gpkg"
 states   <- st_read(gpkg_path, layer = "states")
 hu4s     <- st_read(gpkg_path, layer = "hu4s")
@@ -27,9 +29,9 @@ counties <- st_read(gpkg_path, layer = "counties")
 iws      <- st_read(gpkg_path, layer = "iws")
 
 q          <- seq(0, 1, length.out = 20)
-res        <- lapply(list(hu4s, counties, states, iws, hu8s),
+res        <- lapply(list(hu4s, counties, iws, hu8s, states),
               function(x) as.numeric(quantile(st_area(x), probs = q)))
-names(res) <- c("hu4", "county", "state", "iws", "hu8s")
+names(res) <- c("hu4", "county", "iws", "hu8s", "states")
 res        <- dplyr::bind_rows(res) %>%
   mutate(q = q) %>%
   tidyr::gather(key = "scale", value = "area", -q)
@@ -37,13 +39,38 @@ res        <- dplyr::bind_rows(res) %>%
 
 theme_opts <- theme_minimal() +
   theme(axis.title = element_text(size = 16),
-        axis.text = element_text(size = 16),
+        axis.text = element_text(size = 16, angle = 90),
         legend.text = element_text(size = 14))
-ggplot() +
+
+color_key <- setNames(viridis::viridis(5), 
+                      c("iws", "county", "hu8s", "hu4", "states"))
+
+g_full <- ggplot() +
   geom_line(data = res, aes(x = area, y = rev(q), color = scale), size = 1.5) +
   ylab("Density") + xlab("Area (m2)") +
-  scale_x_continuous(labels = c("10^2", "10^11"),
-                     breaks = c(10^2, 10^11)) +
+  scale_x_continuous(labels = c("2^10", "10^10", "11^10", "12^10"),
+                     breaks = c(10^2, 10^10, 11^10, 12^10)) +
+  scale_color_manual(values = color_key) +
   theme_opts +
   labs(color = "")
+
+g_zoom <- ggplot() +
+  geom_line(data = dplyr::filter(res, scale %in% c("iws", "county", "hu8s")), 
+            aes(x = area, y = rev(q), color = scale), size = 1.5) +
+  ylab("Density") + xlab("Area (m2)") +
+  scale_x_continuous(labels = c("2^10", "10^10"),
+                     breaks = c(2^10, 10^10)) + 
+  scale_color_manual(values = color_key) +
+  theme_opts +
+  labs(color = "")
+
+legend <- get_legend(g_full)
+
+plot_grid(
+  g_zoom + theme(legend.position = "none"),
+  g_full + theme(legend.position = "none", 
+                 axis.text.y = element_blank()) +
+    ylab(""), 
+  legend,
+  nrow = 1)
 ```
