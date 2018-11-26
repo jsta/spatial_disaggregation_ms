@@ -1,6 +1,5 @@
 # setwd("../")
 source("scripts/99_utils.R")
-# source("01_prepdata.R")
 
 # ---- size_comparison ----
 lg   <- lagosne_load()
@@ -24,12 +23,25 @@ counties <- county_sf() %>%
 hu4_zones <- lg$hu4 %>%
   mutate(hu4_states = gsub("  ", "NA", sprintf("%-10s", hu4_states, "NA"))) %>%
   tidyr::separate(hu4_states, into = paste0("state_", 1:5), sep = seq(2, 8, 2)) %>%
-  dplyr::select(starts_with("state"), hu4_zoneid) %>%
-  tidyr::gather(key = "state", value = "value", -hu4_zoneid) %>%
+  dplyr::select(starts_with("state"), hu4_zoneid, hu4) %>%
+  tidyr::gather(key = "state", value = "value", -hu4_zoneid, -hu4) %>%
   dplyr::filter(value %in% state_codes) %>%
-  distinct(hu4_zoneid)
+  distinct(hu4)
 
-hu4s <- LAGOSextra::query_gis("HU4", "ZoneID", hu4_zones$hu4_zoneid)
+hu4s       <- lapply(state_codes,
+               function(x) findWBD(getAOI(state = x),
+                                   level = 4, crop = FALSE))
+hu4s       <- lapply(hu4s, function(x) st_as_sf(x$huc4))
+hu4s       <- lapply(hu4s, function(x){
+  names(x) <- c("objectid","tnmid","metasourceid","sourcedatadesc","sourceoriginator","sourcefeatureid","loaddate","gnis_id","areaacres","areasqkm","states","huc4","name","shape_length","shape_area","geometry")
+  x
+  })
+hu4s       <- do.call("rbind", hu4s)
+hu4s       <- dplyr::filter(hu4s, !duplicated(hu4s$huc4))
+hu4s       <- dplyr::filter(hu4s, hu4s$huc4 %in% hu4_zones$hu4)
+# hu4s <- LAGOSextra::query_gis("HU4", "ZoneID", hu4_zones$hu4_zoneid)
+
+
 iws  <- LAGOSextra::query_gis("IWS", "lagoslakeid", ep$lagoslakeid)
 
 hu8_zones <- lg$hu8 %>%
