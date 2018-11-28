@@ -10,7 +10,8 @@ knitr::opts_chunk$set(echo = TRUE, fig.path = "../figures/", fig.width = 5, fig.
 ```
 
 ```{r read_chunks, cache=FALSE, echo=FALSE}
-# source("scripts/99_utils.R")
+# setwd("scripts")
+# source("../scripts/99_utils.R")
 knitr::read_chunk("../scripts/99_utils.R")
 ```
 
@@ -25,32 +26,93 @@ library(macroag)
 data("tillage_ctic")
 # setwd("scripts")
 gpkg_path <- "../data/gis.gpkg"
+hu4s      <- st_read(gpkg_path, layer = "hu4s")
 hu8s      <- st_read(gpkg_path, layer = "hu8s")
 states    <- st_read(gpkg_path, layer = "states")
 counties  <- st_read(gpkg_path, layer = "counties")
 lg        <- lagosne_load()
 
-n_cat  <- 4
-colors <- c("red", "yellow", "blue", "green")
+n_cat      <- 4
+colors     <- c("red", "yellow", "blue", "green")
 break_cuts <- c(0, 10, 25, 50, 100)
 
-tc <- dplyr::filter(tillage_ctic, huc8_n %in% as.character(hu8s$HUC8)) %>%
+tc <- dplyr::filter(tillage_ctic, huc8_n %in% as.character(hu8s$huc8)) %>%
     left_join(dplyr::select(lg$hu8, hu8, hu8_zoneid),
             by = c("huc8_n" = "hu8")) %>%
   dplyr::filter(year == 2004 & crop == "allcrops")
-hu8s <- dplyr::left_join(hu8s, tc, by = c("ZoneID" = "hu8_zoneid"))
+hu8s <- dplyr::left_join(hu8s, tc)
 hu8s    <- mutate(hu8s, 
                  pctnotil_cat = cut(hu8s$pctnotil, breaks = break_cuts))
+hu8s <- dplyr::filter(hu8s, !is.na(pctnotil))
 
-counties <- st_transform(counties, st_crs(hu8s))
-counties <- st_cast(counties, "MULTIPOLYGON")
-counties <- sf::st_interpolate_aw(hu8s["pctnotil"], counties, extensive = FALSE)
-counties <- mutate(counties,
-                   pctnotil_cat = cut(counties$pctnotil, breaks = break_cuts))
+if(!file.exists("../data/counties_tillage.rds")){
+  counties <- st_transform(counties, st_crs(hu8s))
+  counties <- st_cast(counties, "MULTIPOLYGON")
+  counties <- sf::st_interpolate_aw(hu8s["pctnotil"], counties, extensive = FALSE)
+  counties <- mutate(counties,
+                     pctnotil_cat = cut(counties$pctnotil, breaks = break_cuts))
+  saveRDS(counties, "../data/counties_tillage.rds")
+}
+counties <- readRDS("../data/counties_tillage.rds")
+
+if(!file.exists("../data/hu4_tillage.rds")){
+  test <- sf::st_interpolate_aw(hu8s["pctnotil"], 
+                                hu4s, 
+                                extensive = FALSE)
+  hu4s <- mutate(hu4s,
+                    pctnotil_cat = cut(hu4s$pctnotil, breaks = break_cuts))
+   saveRDS(hu4s, "../data/hu4_tillage.rds")
+}
+hu4s <- readRDS("../data/hu4_tillage.rds")
+
+# debug hu4 failures
+library(HydroData)
+hu4s_oh <- getAOI(state = c("OH")) %>% findWBD(level = 4, crop = FALSE)
+hu4s_oh <- hu4s_oh$huc4
+hu4s_oh <- st_transform(st_as_sf(hu4s_oh), st_crs(hu8s))
+
+h8s <- hu8s[unlist(lapply(st_intersects(hu8s, hu4s_oh), function(x) length(x) > 0)),]
+
+hu4s_oh_lg <- hu4s[unlist(lapply(st_intersects(hu4s, h8s), function(x) length(x) > 0)),]
+hu4s_oh_lg <- hu4s_oh_lg[hu4s_oh_lg$HUC4 %in% hu4s_oh$HUC4,]
+
+st_equals(hu4s_oh, hu4s_oh_lg)
+
+
+mapview::mapview(hu4s_oh[1,], color = "yellow") + mapview::mapview(hu4s_oh_lg[1,])
+st_equals_exact(hu4s_oh[1,], hu4s_oh_lg[1,], 0.2)
+
+test <- sf::st_interpolate_aw(h8s["pctnotil"], 
+                                hu4s_oh_lg, 
+                                extensive = FALSE)
+
+####
+mapview::mapview(st_simplify(hu4s))
+mapview::mapview(hu4s)
+test <- st_union(st_snap(hu4s, hu4s, tolerance = 0.0001))
+
+# filter method
+test <- st_cast(hu4s, "POLYGON") %>%
+  mutate(area = st_area(.)) %>%
+  dplyr::filter(area > units::as_units(2000000000, "m2")) %>%
+  st_simplify()
+mapview(hu4s)
+
+# squeeze method
+test <- st_buffer(dplyr::filter(hu4s, HUC4 == "0415"), 0.00001)
+
+# snap method
+test2 <- st_union(st_snap(test, test, tolerance = 0.0001))
+mapview::mapview(test2)
+length(test)
+test <- lapply(hu4s$geom, st_is_simple)
+
+
 
 g_hu8 <- ggplot() +
   geom_sf(data = hu8s, aes(fill = pctnotil_cat), size = 0.2) +
-  scale_fill_manual(values = colors, levels(hu8s$pctnotil_cat)) + 
+  scale_fill_manual(name = "tillage %", 
+                    values = colors, levels(hu8s$pctnotil_cat)) + 
   geom_sf(data = states, alpha = 0, size = 0.5) +
   coord_sf(datum = NA) +
   theme_opts
