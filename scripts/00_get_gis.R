@@ -30,10 +30,35 @@ hu4_zones <- lg$hu4 %>%
   dplyr::filter(value %in% state_codes) %>%
   distinct(hu4, hu4_zoneid)
 
-hu4s       <- lapply(state_codes,
-               function(x) findWBD(getAOI(state = x),
-                                   level = 4, crop = FALSE))
-hu4s       <- lapply(hu4s, function(x) st_as_sf(x$huc4))
+if(!file.exists("hu4s_raw.rds")){
+  hu4s_raw       <- lapply(state_codes,
+                 function(x) findWBD(getAOI(state = x),
+                                     level = 4, crop = FALSE))
+  saveRDS(hu4s_raw, "hu4s_raw.rds")
+}
+
+hu4s_raw   <- readRDS("hu4s_raw.rds")
+hu4s       <- lapply(hu4s_raw, function(x) st_as_sf(x$huc4))
+h4s_hd     <- hu4s[[3]]
+
+h4s_lg <- LAGOSNEgis::query_gis("HU4", "ZoneID",
+                                dplyr::filter(lg$hu4,
+                                              hu4 %in% test$HUC4)$hu4_zoneid)
+
+h8s_lg <- LAGOSNEgis::query_gis_(
+  query = paste0("SELECT * FROM HU8 WHERE ",
+  paste0("HUC8 LIKE '", h4s_lg$HUC4, "%'", collapse = " OR ")))
+
+
+hh <- st_overlaps(h8s_lg)
+
+test2 <- st_cast(test2, "POLYGON")
+test3 <- st_union(test2)
+mapview(st_difference(test3, test2))
+
+
+h4s <- dplyr::filter(st_as_sf(h4s$huc4),
+                     HUC4 %in% c("0708","0706","0710","0702","0704"))
 hu4s       <- lapply(hu4s, function(x){
                 names(x)   <- c("objectid","tnmid","metasourceid",
                                 "sourcedatadesc", "sourceoriginator",
