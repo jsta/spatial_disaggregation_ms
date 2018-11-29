@@ -77,6 +77,7 @@ if(!file.exists("data/counties_tillage.rds")){
   counties <- sf::st_interpolate_aw(hu8s["pctnotil"], counties, extensive = FALSE)
   counties <- mutate(counties,
                      pctnotil_cat = cut(counties$pctnotil, breaks = break_cuts))
+  # add county_zoneid
   saveRDS(counties, "data/counties_tillage.rds")
 }
 
