@@ -19,56 +19,14 @@ knitr::read_chunk("../scripts/99_utils.R")
 ```
 
 ```{r 02_tillage_map, echo=FALSE, warning=FALSE, fig.width = 5.5, fig.height = 3}
-# ---- tillage_map ----
-library(macroag)
-
-data("tillage_ctic")
-# setwd("scripts")
-gpkg_path <- "../data/gis.gpkg"
-hu4s      <- st_read(gpkg_path, layer = "hu4s")
-hu8s      <- st_read(gpkg_path, layer = "hu8s")
-states    <- st_read(gpkg_path, layer = "states")
-counties  <- st_read(gpkg_path, layer = "counties")
-lg        <- lagosne_load()
-
-n_cat      <- 4
-colors     <- c("red", "yellow", "blue", "green")
-break_cuts <- c(0, 10, 25, 50, 100)
-
-tc <- dplyr::filter(tillage_ctic, huc8_n %in% as.character(hu8s$HUC8)) %>%
-    left_join(dplyr::select(lg$hu8, hu8, hu8_zoneid),
-            by = c("huc8_n" = "hu8")) %>%
-  dplyr::filter(year == 2004 & crop == "allcrops")
-hu8s <- dplyr::left_join(hu8s, tc, by = c("ZoneID" = "hu8_zoneid"))
-hu8s    <- mutate(hu8s, 
-                 pctnotil_cat = cut(hu8s$pctnotil, breaks = break_cuts))
-hu8s <- dplyr::filter(hu8s, !is.na(pctnotil))
-
-if(!file.exists("../data/counties_tillage.rds")){
-  counties <- st_transform(counties, st_crs(hu8s))
-  counties <- st_cast(counties, "MULTIPOLYGON")
-  counties <- sf::st_interpolate_aw(hu8s["pctnotil"], counties, extensive = FALSE)
-  counties <- mutate(counties,
-                     pctnotil_cat = cut(counties$pctnotil, breaks = break_cuts))
-  saveRDS(counties, "../data/counties_tillage.rds")
-}
+# setwd("../")
+hu4s     <- readRDS("../data/hu4_tillage.rds")
+hu8s     <- readRDS("../data/hu8_tillage.rds")
 counties <- readRDS("../data/counties_tillage.rds")
+states   <- st_read("../data/gis.gpkg", layer = "states")
 
-if(!file.exists("../data/hu4_tillage.rds")){
-  hu4_pctnotil <- hu8s %>% 
-    mutate(HUC4 = substring(HUC8, 0, 4)) %>%
-    mutate(notilarea_j = pctnotil * Shape_Area) %>%
-    group_by(HUC4) %>%
-    summarize(pctnotil = sum(notilarea_j, na.rm = TRUE) / sum(Shape_Area)) %>%
-    st_drop_geometry()
+colors     <- c("red", "yellow", "blue", "green")
   
-  hu4s <- hu4s %>% 
-    left_join(hu4_pctnotil) %>% 
-    mutate(pctnotil_cat = cut(pctnotil, breaks = break_cuts))
-   saveRDS(hu4s, "../data/hu4_tillage.rds")
-}
-hu4s <- readRDS("../data/hu4_tillage.rds")
-
 g_hu8 <- ggplot() +
   geom_sf(data = hu8s, aes(fill = pctnotil_cat), size = 0.2) +
   scale_fill_manual(name = "tillage %", 

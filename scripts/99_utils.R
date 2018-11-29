@@ -12,6 +12,7 @@ library(tidyr)
 library(stringr)
 library(cowplot)
 library(mapview)
+library(macroag)
 
 theme_opts <- theme(axis.text = element_blank(),
                     axis.ticks = element_blank(),

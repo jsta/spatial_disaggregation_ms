@@ -38,7 +38,8 @@ hu8s <- LAGOSNEgis::query_gis_(
 # unlink("data/gis.gpkg")
 # st_layers("data/gis.gpkg")
 gpkg_path <- "data/gis.gpkg"
-st_write(states, gpkg_path, layer = "states", layer_options = c("OVERWRITE=yes"))
+st_write(states, gpkg_path, layer = "states",
+         layer_options = c("OVERWRITE=yes"))
 st_write(hu4s, gpkg_path, layer = "hu4s", update = TRUE,
          layer_options = c("OVERWRITE=yes"))
 st_write(hu8s, gpkg_path, layer = "hu8s", update = TRUE,
@@ -47,3 +48,48 @@ st_write(counties, gpkg_path, layer = "counties", update = TRUE,
          layer_options = c("OVERWRITE=yes"))
 st_write(iws, gpkg_path, layer = "iws", update = TRUE,
          layer_options = c("OVERWRITE=yes"))
+
+# ---- tillage_data ----
+data("tillage_ctic")
+hu4s      <- st_read(gpkg_path, layer = "hu4s")
+hu8s      <- st_read(gpkg_path, layer = "hu8s")
+states    <- st_read(gpkg_path, layer = "states")
+counties  <- st_read(gpkg_path, layer = "counties")
+lg        <- lagosne_load()
+
+n_cat      <- 4
+colors     <- c("red", "yellow", "blue", "green")
+break_cuts <- c(0, 10, 25, 50, 100)
+
+tc <- dplyr::filter(tillage_ctic, huc8_n %in% as.character(hu8s$HUC8)) %>%
+  left_join(dplyr::select(lg$hu8, hu8, hu8_zoneid),
+            by = c("huc8_n" = "hu8")) %>%
+  dplyr::filter(year == 2004 & crop == "allcrops")
+hu8s <- dplyr::left_join(hu8s, tc, by = c("ZoneID" = "hu8_zoneid"))
+hu8s    <- mutate(hu8s,
+                  pctnotil_cat = cut(hu8s$pctnotil, breaks = break_cuts))
+hu8s <- dplyr::filter(hu8s, !is.na(pctnotil))
+saveRDS(hu8s, "data/hu8_tillage.rds")
+
+if(!file.exists("data/counties_tillage.rds")){
+  counties <- st_transform(counties, st_crs(hu8s))
+  counties <- st_cast(counties, "MULTIPOLYGON")
+  counties <- sf::st_interpolate_aw(hu8s["pctnotil"], counties, extensive = FALSE)
+  counties <- mutate(counties,
+                     pctnotil_cat = cut(counties$pctnotil, breaks = break_cuts))
+  saveRDS(counties, "data/counties_tillage.rds")
+}
+
+if(!file.exists("data/hu4_tillage.rds")){
+  hu4_pctnotil <- hu8s %>%
+    mutate(HUC4 = substring(HUC8, 0, 4)) %>%
+    mutate(notilarea_j = pctnotil * Shape_Area) %>%
+    group_by(HUC4) %>%
+    summarize(pctnotil = sum(notilarea_j, na.rm = TRUE) / sum(Shape_Area)) %>%
+    st_drop_geometry()
+
+  hu4s <- hu4s %>%
+    left_join(hu4_pctnotil) %>%
+    mutate(pctnotil_cat = cut(pctnotil, breaks = break_cuts))
+  saveRDS(hu4s, "data/hu4_tillage.rds")
+}
