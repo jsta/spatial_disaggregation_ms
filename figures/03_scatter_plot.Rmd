@@ -1,0 +1,33 @@
+---
+title: "Figures"
+output:
+  pdf_document:
+    fig_caption: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.path = "../figures/", fig.width = 5, fig.height = 6)
+```
+
+```{r read_chunks, cache=FALSE, echo=FALSE}
+# setwd("scripts"); source("../scripts/99_utils.R")
+knitr::read_chunk("../scripts/99_utils.R")
+```
+
+```{r source_utils, message=FALSE, results='hide', echo=FALSE, warning=FALSE}
+
+```
+
+```{r 03_scatter_plot, echo=FALSE, warning=FALSE, fig.width = 5.5, fig.height = 3}
+lg <- lagosne_load()
+
+gpkg_path <- "../data/gis.gpkg"
+hu4s      <- st_read(gpkg_path, layer = "hu4s")
+hu8s      <- st_read(gpkg_path, layer = "hu8s")
+states    <- st_read(gpkg_path, layer = "states")
+counties  <- st_read(gpkg_path, layer = "counties")
+lg        <- lagosne_load()
+
+ggplot() + 
+  geom_point(data = lg$epi_nutr, aes(x = tp, y = tn))
+```
