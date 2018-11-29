@@ -30,86 +30,10 @@ hu4_zones <- lg$hu4 %>%
   dplyr::filter(value %in% state_codes) %>%
   distinct(hu4, hu4_zoneid)
 
-if(!file.exists("hu4s_raw.rds")){
-  hu4s_raw       <- lapply(state_codes,
-                 function(x) findWBD(getAOI(state = x),
-                                     level = 4, crop = FALSE))
-  saveRDS(hu4s_raw, "hu4s_raw.rds")
-}
-
-hu4s_raw   <- readRDS("hu4s_raw.rds")
-hu4s       <- lapply(hu4s_raw, function(x) st_as_sf(x$huc4))
-h4s_hd     <- hu4s[[3]]
-
-h4s_lg <- LAGOSNEgis::query_gis("HU4", "ZoneID",
-                                dplyr::filter(lg$hu4,
-                                              hu4 %in% test$HUC4)$hu4_zoneid)
-
-h8s_lg <- LAGOSNEgis::query_gis_(
+hu4s <- LAGOSNEgis::query_gis("HU4", "ZoneID", hu4_zones$hu4_zoneid)
+hu8s <- LAGOSNEgis::query_gis_(
   query = paste0("SELECT * FROM HU8 WHERE ",
-  paste0("HUC8 LIKE '", h4s_lg$HUC4, "%'", collapse = " OR ")))
-
-
-hh <- st_overlaps(h8s_lg)
-
-test2 <- st_cast(test2, "POLYGON")
-test3 <- st_union(test2)
-mapview(st_difference(test3, test2))
-
-
-h4s <- dplyr::filter(st_as_sf(h4s$huc4),
-                     HUC4 %in% c("0708","0706","0710","0702","0704"))
-hu4s       <- lapply(hu4s, function(x){
-                names(x)   <- c("objectid","tnmid","metasourceid",
-                                "sourcedatadesc", "sourceoriginator",
-                                "sourcefeatureid","loaddate","gnis_id",
-                                "areaacres","areasqkm","states","huc4",
-                                "name","shape_length","shape_area",
-                                "geometry"); x
-                })
-hu4s       <- do.call("rbind", hu4s)
-hu4s       <- dplyr::filter(hu4s, !duplicated(hu4s$huc4))
-hu4s       <- dplyr::filter(hu4s, hu4s$huc4 %in% hu4_zones$hu4)
-hu4s       <- st_transform(hu4s, st_crs(iws))
-hu4s       <- left_join(hu4s,
-                        dplyr::select(lg$hu4, hu4, hu4_zoneid),
-                        by = c("huc4" = "hu4"))
-
-# join zoneids
-
-
-# hu4s <- LAGOSNEgis::query_gis("HU4", "ZoneID", hu4_zones$hu4_zoneid)
-
-hu8_zones <- lg$hu8 %>%
-  mutate(hu8_states = gsub("  ", "NA", sprintf("%-8s", hu8_states, "NA"))) %>%
-  tidyr::separate(hu8_states, into = paste0("state_", 1:4), sep = seq(2, 6, 2)) %>%
-  dplyr::select(starts_with("state"), hu8_zoneid, hu8) %>%
-  tidyr::gather(key = "state", value = "value", -hu8_zoneid, -hu8) %>%
-  dplyr::filter(value %in% state_codes) %>%
-  distinct(hu8, hu8_zoneid)
-
-hu8s       <- lapply(state_codes,
-                     function(x) findWBD(getAOI(state = x),
-                                         level = 8, crop = FALSE))
-hu8s       <- lapply(hu8s, function(x) st_as_sf(x$huc8))
-hu8s       <- lapply(hu8s, function(x){
-  names(x)   <- tolower(names(x))
-  x <- dplyr::select(x, huc8, states, geometry)
-  x
-})
-hu8s       <- do.call("rbind", hu8s)
-hu8s       <- dplyr::filter(hu8s, !duplicated(hu8s$huc8))
-
-hu8s       <- dplyr::filter(hu8s, hu8s$huc8 %in% hu8_zones$hu8)
-hu8s       <- st_transform(hu8s, st_crs(iws))
-hu8s       <- left_join(hu8s,
-                  dplyr::select(lg$hu8, hu8, hu8_zoneid),
-                  by = c("huc8" = "hu8"))
-
-
-# join zoneids
-
-# hu8s <- LAGOSNEgis::query_gis("HU8", "ZoneID", hu8_zones$hu8_zoneid)
+                 paste0("HUC8 LIKE '", hu4s$HUC4, "%'", collapse = " OR ")))
 
 # unlink("data/gis.gpkg")
 # st_layers("data/gis.gpkg")

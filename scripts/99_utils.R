@@ -11,7 +11,6 @@ library(classInt)
 library(tidyr)
 library(stringr)
 library(cowplot)
-library(HydroData)
 library(mapview)
 
 theme_opts <- theme(axis.text = element_blank(),

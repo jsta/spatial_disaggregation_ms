@@ -35,11 +35,11 @@ n_cat      <- 4
 colors     <- c("red", "yellow", "blue", "green")
 break_cuts <- c(0, 10, 25, 50, 100)
 
-tc <- dplyr::filter(tillage_ctic, huc8_n %in% as.character(hu8s$huc8)) %>%
+tc <- dplyr::filter(tillage_ctic, huc8_n %in% as.character(hu8s$HUC8)) %>%
     left_join(dplyr::select(lg$hu8, hu8, hu8_zoneid),
             by = c("huc8_n" = "hu8")) %>%
   dplyr::filter(year == 2004 & crop == "allcrops")
-hu8s <- dplyr::left_join(hu8s, tc)
+hu8s <- dplyr::left_join(hu8s, tc, by = c("ZoneID" = "hu8_zoneid"))
 hu8s    <- mutate(hu8s, 
                  pctnotil_cat = cut(hu8s$pctnotil, breaks = break_cuts))
 hu8s <- dplyr::filter(hu8s, !is.na(pctnotil))
@@ -55,187 +55,19 @@ if(!file.exists("../data/counties_tillage.rds")){
 counties <- readRDS("../data/counties_tillage.rds")
 
 if(!file.exists("../data/hu4_tillage.rds")){
-  test <- sf::st_interpolate_aw(hu8s["pctnotil"], 
-                                hu4s, 
-                                extensive = FALSE)
-  hu4s <- mutate(hu4s,
-                    pctnotil_cat = cut(hu4s$pctnotil, breaks = break_cuts))
+  hu4_pctnotil <- hu8s %>% 
+    mutate(HUC4 = substring(HUC8, 0, 4)) %>%
+    mutate(notilarea_j = pctnotil * Shape_Area) %>%
+    group_by(HUC4) %>%
+    summarize(pctnotil = sum(notilarea_j, na.rm = TRUE) / sum(Shape_Area)) %>%
+    st_drop_geometry()
+  
+  hu4s <- hu4s %>% 
+    left_join(hu4_pctnotil) %>% 
+    mutate(pctnotil_cat = cut(pctnotil, breaks = break_cuts))
    saveRDS(hu4s, "../data/hu4_tillage.rds")
 }
 hu4s <- readRDS("../data/hu4_tillage.rds")
-
-# debug hu4 failures
-state_code <- "IA"
-st    <- dplyr::filter(states, ABB == state_code)
-h4_oh <- dplyr::filter(hu4s, str_detect(states, state_code))
-h8_oh <- dplyr::filter(hu8s, str_detect(states, state_code))
-h4_oh <- h4_oh[unique(unlist(st_covered_by(h8_oh, h4_oh))),]
-h4_oh <- h4_oh[c(1, 3, 4, 6, 9),]# st_overlaps(h4_oh)
-t2 <- rmapshaper::ms_simplify(h4_oh)
-
-dd <- counties[unlist(lapply(st_intersects(st_transform(counties, st_crs(t2)), t2), function(x) length(x) > 0)),]
-cbind(as.character(dd$state), as.character(dd$county))
-
-test <- st_geometry(t2)
-plot(test)
-plot(st_difference(test))
-
-st_overlaps(st_difference(st_set_precision(test, 1)))
-
-# try combining units of the interpolate docs
-# try GRASS
-
-
-d <- st_difference(st_union(t2[1,]), st_union(t2[2:5,]))
-st_overlaps(d, t2[2:5,])
-
-d <- st_difference(t2[1,], t2[2:5,])
-test <- d[which.min(st_area(d)),]
-st_overlaps(test, t2[2:5,])
-
-
-mapview(st_difference(t2[1,], t2[2:5,])) + mapview(t2[1,], color = "red")
-st_equals(t2[1,], st_difference(t2[1,], t2[2:5,]))
-
-st_intersection(t2)
-st_overlaps(st_difference(t2))
-
-t1 <- rmapshaper::ms_simplify(h8_oh)
-
-t2 <- dplyr::select(t2, huc4, geom)
-
-library(RQGIS)
-set_env()
-find_algorithms("sliver")
-get_usage(alg = "qgis:eliminatesliverpolygons")
-
-params <- get_args_man("qgis:eliminatesliverpolygons")
-params$INPUT <- as_Spatial(h4_oh)
-params$ATTRIBUTE <- "huc4"
-params$MODE <- 2
-
-(tfile <- tempfile(fileext = ".shp"))
-params$OUTPUT <- tfile
-out <- run_qgis(alg = "qgis:eliminatesliverpolygons",
-                params = params,
-                load_output = TRUE)
-
-mapview(out)
-
-params$INPUT <- as_Spatial(h8_oh)
-params$ATTRIBUTE <- "huc8"
-(tfile <- tempfile(fileext = ".shp"))
-params$OUTPUT <- tfile
-out2 <- run_qgis(alg = "qgis:eliminatesliverpolygons",
-                params = params,
-                load_output = TRUE)
-
-test <- sf::st_interpolate_aw(out2["pctnotl"], 
-                                out, 
-                                extensive = FALSE)
-
-
-mapview(st_snap(t2, t2, tolerance = 0.001))
-
-st_squeeze <- function(t2){
-  test <- t2 %>% 
-    st_set_precision(1e5) %>%
-    st_buffer(.00001) %>% 
-    st_difference(., .) %>%
-    st_combine() %>%
-    st_union()
-}
-
- test <- t2 %>% 
-    st_set_precision(1e5) %>%
-    st_buffer(.00001) %>% 
-    st_difference(., .) %>%
-    st_combine() %>%
-    st_union()
-
-test <- t2 %>% st_intersection(
-  st_buffer(
-    st_buffer(.,-1), 
-    1), 
-.)
-
-
-test <- purrr::reduce(st_geometry(t2), st_intersection)
-
-test <- st_squeeze(t2)
-
-
-  
-
-mapview(t2)
-
-test <- sf::st_interpolate_aw(t1["pctnotil"], 
-                                t2, 
-                                extensive = FALSE)
-
-
-t1 <- st_snap(h4_oh, h4_oh, tolerance = 0.0001)
-
-h4_oh <- st_simplify(h4_oh, dTolerance = 200, preserveTopology = TRUE)
-h4_oh <- st_snap(h4_oh, h4_oh, tolerance = 0)
-h8_oh <- st_simplify(h8_oh, dTolerance = 200)
-h8_oh <- st_snap(h8_oh, h8_oh, tolerance = 0)
-
-h8_oh <- st_cast(h8_oh, "POLYGON")
-h4_oh <- st_cast(h4_oh, "POLYGON")
-test <- sf::st_interpolate_aw(h8_oh["pctnotil"], 
-                                h4_oh, 
-                                extensive = FALSE)
-
-library(rmapshaper)
-
-
-
-
-
-
-library(HydroData)
-hu4s_oh <- getAOI(state = c("OH")) %>% findWBD(level = 4, crop = FALSE)
-hu4s_oh <- hu4s_oh$huc4
-hu4s_oh <- st_transform(st_as_sf(hu4s_oh), st_crs(hu8s))
-
-h8s <- hu8s[unlist(lapply(st_intersects(hu8s, hu4s_oh), function(x) length(x) > 0)),]
-
-hu4s_oh_lg <- hu4s[unlist(lapply(st_intersects(hu4s, h8s), function(x) length(x) > 0)),]
-hu4s_oh_lg <- hu4s_oh_lg[hu4s_oh_lg$HUC4 %in% hu4s_oh$HUC4,]
-
-st_equals(hu4s_oh, hu4s_oh_lg)
-
-
-mapview::mapview(hu4s_oh[1,], color = "yellow") + mapview::mapview(hu4s_oh_lg[1,])
-st_equals_exact(hu4s_oh[1,], hu4s_oh_lg[1,], 0.2)
-
-test <- sf::st_interpolate_aw(h8s["pctnotil"], 
-                                hu4s_oh_lg, 
-                                extensive = FALSE)
-
-####
-mapview::mapview(st_simplify(hu4s))
-mapview::mapview(hu4s)
-test <- st_union(st_snap(hu4s, hu4s, tolerance = 0.0001))
-
-# filter method
-test <- st_cast(hu4s, "POLYGON") %>%
-  mutate(area = st_area(.)) %>%
-  dplyr::filter(area > units::as_units(2000000000, "m2")) %>%
-  st_simplify()
-mapview(hu4s)
-
-# squeeze method
-test <- st_buffer(dplyr::filter(hu4s, HUC4 == "0415"), 0.00001)
-
-# snap method
-test2 <- st_union(st_snap(test, test, tolerance = 0.0001))
-mapview::mapview(test2)
-length(test)
-test <- lapply(hu4s$geom, st_is_simple)
-
-
 
 g_hu8 <- ggplot() +
   geom_sf(data = hu8s, aes(fill = pctnotil_cat), size = 0.2) +
@@ -250,16 +82,18 @@ g_counties <- ggplot() +
   geom_sf(data = states, alpha = 0, size = 0.5) +
   coord_sf(datum = NA) +
   theme_opts
+g_hu4 <- ggplot() +
+  geom_sf(data = hu4s, aes(fill = pctnotil_cat), size = 0.2) +
+  scale_fill_manual(name = "tillage %", 
+                    values = colors, levels(hu4s$pctnotil_cat)) + 
+  geom_sf(data = states, alpha = 0, size = 0.5) +
+  coord_sf(datum = NA) +
+  theme_opts
 legend <- get_legend(g_hu8)
 
-plot_grid(g_hu8 + theme(legend.position = "none"), 
+plot_grid(g_hu4 + theme(legend.position = "none"),
+          g_hu8 + theme(legend.position = "none"), 
           g_counties + theme(legend.position = "none"), 
           legend, 
-          nrow = 1, ncol = 3)
-
-# data("tillage_ctic")
-#
-#
-# plot(tillage_ctic$totacre, tillage_ctic$notill)
-# abline(0, 1)
+          nrow = 1)
 ```
