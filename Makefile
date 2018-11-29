@@ -2,9 +2,12 @@
 
 all: data figures
 
-data: data/gis.gpkg
+data: data/gis.gpkg data/ep_nutr.rds
 
 data/gis.gpkg: scripts/00_get_gis.R
+	Rscript $<
+
+data/ep_nutr.rds: scripts/00_get_ep.R
 	Rscript $<
 
 figures: data manuscript/figures.pdf

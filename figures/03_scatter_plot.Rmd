@@ -28,6 +28,8 @@ states    <- st_read(gpkg_path, layer = "states")
 counties  <- st_read(gpkg_path, layer = "counties")
 lg        <- lagosne_load()
 
+
+
 ggplot() + 
   geom_point(data = lg$epi_nutr, aes(x = tp, y = tn))
 ```
