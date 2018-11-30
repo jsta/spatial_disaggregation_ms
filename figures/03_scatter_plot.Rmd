@@ -44,20 +44,19 @@ ep <- ep_raw %>%
   left_join(dplyr::select(st_drop_geometry(hu8_tillage), ZoneID, pctnotil), 
                           by = c("hu8_zoneid" = "ZoneID")) %>%
   rename(pctnotil_hu8 = pctnotil) %>% 
-  left_join(dplyr::select(st_drop_geometry(counties_tillage), ZoneID, pctnotil), 
-                          by = c("hu8_zoneid" = "ZoneID")) %>%
-  rename(pctnotil_hu8 = pctnotil)
-
-# join notill data
+  
+  left_join(dplyr::select(st_drop_geometry(counties_tillage), county_zoneid, pctnotil), 
+                          by = c("county_zoneid")) %>%
+  rename(pctnotil_county = pctnotil)
 
 # cowplot of tp vs notill
-
+plot_grid(
 ggplot() + 
-  geom_point(data = ep, aes(x = pctnotil_hu4, y = tn))
-
+  geom_point(data = ep, aes(x = pctnotil_hu4, y = tn)),
 ggplot() + 
-  geom_point(data = ep, aes(x = pctnotil_hu8, y = tn))
-
-
+  geom_point(data = ep, aes(x = pctnotil_hu8, y = tn)),
+ggplot() + 
+  geom_point(data = ep, aes(x = pctnotil_county, y = tn))
+)
 
 ```

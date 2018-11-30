@@ -3,6 +3,7 @@ source("scripts/99_utils.R")
 
 # ---- size_comparison ----
 lg   <- lagosne_load()
+gpkg_path <- "data/gis.gpkg"
 
 ep <- readRDS("~/Documents/Science/JournalSubmissions/lagos_ag/data/ep.rds") %>%
   st_as_sf(coords = c("nhd_long", "nhd_lat"), crs = 4326)
@@ -15,9 +16,7 @@ state_codes <- c("IL", "IN", "IA",
 states <- state_sf() %>%
   dplyr::filter(., ABB %in% state_codes)
 
-counties <- county_sf() %>%
-  dplyr::filter(unlist(lapply(st_intersects(., states),
-                              function(x) length(x) > 0)))
+counties <- dplyr::filter(county_sf(), state_abb %in% state_codes)
 
 # use LAGOSNE to pull hu ids that correspond to states
 # lg <- lagosne_load()
@@ -37,7 +36,6 @@ hu8s <- LAGOSNEgis::query_gis_(
 
 # unlink("data/gis.gpkg")
 # st_layers("data/gis.gpkg")
-gpkg_path <- "data/gis.gpkg"
 st_write(states, gpkg_path, layer = "states",
          layer_options = c("OVERWRITE=yes"))
 st_write(hu4s, gpkg_path, layer = "hu4s", update = TRUE,
@@ -74,10 +72,26 @@ saveRDS(hu8s, "data/hu8_tillage.rds")
 if(!file.exists("data/counties_tillage.rds")){
   counties <- st_transform(counties, st_crs(hu8s))
   counties <- st_cast(counties, "MULTIPOLYGON")
+
+  cnty_lg <- lg$county %>%
+    mutate(county_name = gsub(" county", "", tolower(county_name))) %>%
+    left_join(lg$state, by = c("county_state" = "state")) %>%
+    mutate(county_name = gsub("\\.", "", gsub(" ", "", county_name))) %>%
+    mutate(county_name = gsub("'", "", gsub("saint", "st", county_name))) %>%
+    mutate(state_name = tolower(state_name)) %>%
+    select(state_zoneid, state_name, county_name, county_state, county_zoneid) %>%
+    # dplyr::filter(cnty_lg, str_detect(county_name, "brien"))
+    left_join(st_drop_geometry(counties), .,
+              by = c("state" = "state_name", "county" = "county_name")) %>%
+    select(state_abb, county, county_zoneid)
+
+  cc       <- st_point_on_surface(counties)
   counties <- sf::st_interpolate_aw(hu8s["pctnotil"], counties, extensive = FALSE)
+  counties <- st_join(counties, cc)
+  counties <- left_join(counties, cnty_lg, by = c("state_abb", "county"))
+
   counties <- mutate(counties,
                      pctnotil_cat = cut(counties$pctnotil, breaks = break_cuts))
-  # add county_zoneid
   saveRDS(counties, "data/counties_tillage.rds")
 }
 

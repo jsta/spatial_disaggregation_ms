@@ -32,10 +32,14 @@ signif_star <- function(x){
 }
 
 county_sf <- function(){
-  county_sf <- st_as_sf(maps::map("county", fill = TRUE, plot = FALSE))
-  county_sf <- tidyr::separate(county_sf, ID, c("state", "county"), ",")
+  county_sf        <- st_as_sf(maps::map("county", fill = TRUE, plot = FALSE))
+  county_sf        <- tidyr::separate(county_sf, ID, c("state", "county"), ",")
   county_sf$county <- gsub("\\.", "", gsub(" ", "", county_sf$county))
-  county_sf <- st_make_valid(county_sf)
+  county_sf        <- st_make_valid(county_sf)
+
+  county_key <- data.frame(state = tolower(state.name), state_abb = state.abb,
+                           stringsAsFactors = FALSE)
+  county_sf <- left_join(county_sf, county_key)
   # county_sf <- county_sf[
   #   unlist(lapply(
   #     st_intersects(county_sf, iws),
