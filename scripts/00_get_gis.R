@@ -17,6 +17,20 @@ states <- state_sf() %>%
   dplyr::filter(., ABB %in% state_codes)
 
 counties <- dplyr::filter(county_sf(), state_abb %in% state_codes)
+cnty_lg <- lg$county %>%
+  mutate(county_name = gsub(" county", "", tolower(county_name))) %>%
+  left_join(lg$state, by = c("county_state" = "state")) %>%
+  mutate(county_name = gsub("\\.", "", gsub(" ", "", county_name))) %>%
+  mutate(county_name = gsub("'", "", gsub("saint", "st", county_name))) %>%
+  mutate(state_name = tolower(state_name)) %>%
+  select(state_zoneid, state_name, county_name, county_state, county_zoneid) %>%
+  # dplyr::filter(cnty_lg, str_detect(county_name, "brien"))
+  left_join(st_drop_geometry(counties), .,
+            by = c("state" = "state_name", "county" = "county_name")) %>%
+  select(state_abb, county, county_zoneid)
+counties <- left_join(counties, cnty_lg, by = c("state_abb", "county"))
+
+# add zoneids
 
 # use LAGOSNE to pull hu ids that correspond to states
 # lg <- lagosne_load()
@@ -49,10 +63,10 @@ st_write(iws, gpkg_path, layer = "iws", update = TRUE,
 
 # ---- tillage_data ----
 data("tillage_ctic")
-hu4s      <- st_read(gpkg_path, layer = "hu4s")
-hu8s      <- st_read(gpkg_path, layer = "hu8s")
-states    <- st_read(gpkg_path, layer = "states")
-counties  <- st_read(gpkg_path, layer = "counties")
+hu4s      <- st_read(gpkg_path, layer = "hu4s", stringsAsFactors = FALSE)
+hu8s      <- st_read(gpkg_path, layer = "hu8s", stringsAsFactors = FALSE)
+states    <- st_read(gpkg_path, layer = "states", stringsAsFactors = FALSE)
+counties  <- st_read(gpkg_path, layer = "counties", stringsAsFactors = FALSE)
 lg        <- lagosne_load()
 
 n_cat      <- 4

@@ -1,7 +1,9 @@
 
 # ---- source_utils ----
 
+library(sp)
 suppressMessages(library(dplyr))
+library(gstat)
 library(ggplot2)
 library(sf)
 library(LAGOSextra)
