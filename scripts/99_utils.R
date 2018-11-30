@@ -67,3 +67,23 @@ get_states <- function(bbox){
 
   state_sf$ABB
 }
+
+Rmd_bind <-  function(dir = ".",
+           book_header = readLines(textConnection("---\ntitle: 'Title'\n---")))
+  {
+    old <- setwd(dir)
+    if(length(grep("book.Rmd", list.files())) > 0){
+      warning("book.Rmd already exists")
+    }
+    write(book_header, file = "book.Rmd", )
+    cfiles <- list.files(pattern = "*.Rmd", )
+    ttext <- NULL
+    for(i in 1:length(cfiles)){
+      text <- readLines(cfiles[i])
+      hspan <- grep("---", text)
+      text <- text[-c(hspan[1]:hspan[2])]
+      write(text, sep = "\n", file = "book.Rmd", append = T)
+    }
+    rmarkdown::render("book.Rmd", output_format = "pdf_document")
+    setwd(old)
+  }

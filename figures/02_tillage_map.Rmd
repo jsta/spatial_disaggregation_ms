@@ -5,11 +5,11 @@ output:
     fig_caption: yes
 ---
 
-```{r setup, include=FALSE}
+```{r setup_02, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, fig.path = "../figures/", fig.width = 5, fig.height = 6)
 ```
 
-```{r read_chunks, cache=FALSE, echo=FALSE}
+```{r read_chunks_02, cache=FALSE, echo=FALSE}
 # setwd("scripts"); source("../scripts/99_utils.R")
 knitr::read_chunk("../scripts/99_utils.R")
 ```
@@ -23,7 +23,7 @@ knitr::read_chunk("../scripts/99_utils.R")
 hu4s     <- readRDS("../data/hu4_tillage.rds")
 hu8s     <- readRDS("../data/hu8_tillage.rds")
 counties <- readRDS("../data/counties_tillage.rds")
-states   <- st_read("../data/gis.gpkg", layer = "states")
+states   <- st_read("../data/gis.gpkg", layer = "states", stringsAsFactors = FALSE)
 
 colors     <- c("red", "yellow", "blue", "green")
   

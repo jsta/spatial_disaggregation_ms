@@ -5,11 +5,11 @@ output:
     fig_caption: yes
 ---
 
-```{r setup, include=FALSE}
+```{r setup_03, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, fig.path = "../figures/", fig.width = 5, fig.height = 6)
 ```
 
-```{r read_chunks, cache=FALSE, echo=FALSE}
+```{r read_chunks_03, cache=FALSE, echo=FALSE}
 # setwd("scripts"); source("../scripts/99_utils.R")
 knitr::read_chunk("../scripts/99_utils.R")
 ```
@@ -22,15 +22,16 @@ knitr::read_chunk("../scripts/99_utils.R")
 lg <- lagosne_load()
 
 gpkg_path <- "../data/gis.gpkg"
-hu4s        <- st_read(gpkg_path, layer = "hu4s")
-hu4_tillage <- readRDS("../data/hu4_tillage.rds")
-hu8s      <- st_read(gpkg_path, layer = "hu8s")
-hu8_tillage <- readRDS("../data/hu8_tillage.rds")
-states    <- st_read(gpkg_path, layer = "states")
-counties  <- st_read(gpkg_path, layer = "counties")
+hu4s             <- st_read(gpkg_path, layer = "hu4s", stringsAsFactors = FALSE)
+hu4_tillage      <- readRDS("../data/hu4_tillage.rds")
+hu8s             <- st_read(gpkg_path, layer = "hu8s", stringsAsFactors = FALSE)
+hu8_tillage      <- readRDS("../data/hu8_tillage.rds")
+states           <- st_read(gpkg_path, layer = "states", stringsAsFactors = FALSE)
+counties         <- st_read(gpkg_path, layer = "counties", 
+                            stringsAsFactors = FALSE)
 counties_tillage <- readRDS("../data/counties_tillage.rds")
-lg        <- lagosne_load()
-ep_raw <- readRDS("../data/ep_nutr.rds")
+lg               <- lagosne_load()
+ep_raw           <- readRDS("../data/ep_nutr.rds")
 
 # join huc ids
 ep <- ep_raw %>%
