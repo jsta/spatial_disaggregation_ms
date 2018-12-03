@@ -83,42 +83,41 @@ hu8s    <- mutate(hu8s,
 hu8s <- dplyr::filter(hu8s, !is.na(pctnotil))
 saveRDS(hu8s, "data/hu8_tillage.rds")
 
-if(!file.exists("data/counties_tillage.rds")){
-  counties <- st_transform(counties, st_crs(hu8s))
-  counties <- st_cast(counties, "MULTIPOLYGON")
+# create countes_tillage.rds
+counties <- st_transform(counties, st_crs(hu8s))
+counties <- st_cast(counties, "MULTIPOLYGON")
 
-  cnty_lg <- lg$county %>%
-    mutate(county_name = gsub(" county", "", tolower(county_name))) %>%
-    left_join(lg$state, by = c("county_state" = "state")) %>%
-    mutate(county_name = gsub("\\.", "", gsub(" ", "", county_name))) %>%
-    mutate(county_name = gsub("'", "", gsub("saint", "st", county_name))) %>%
-    mutate(state_name = tolower(state_name)) %>%
-    select(state_zoneid, state_name, county_name, county_state, county_zoneid) %>%
-    # dplyr::filter(cnty_lg, str_detect(county_name, "brien"))
-    left_join(st_drop_geometry(counties), .,
-              by = c("state" = "state_name", "county" = "county_name")) %>%
-    select(state_abb, county, county_zoneid)
+cnty_lg <- lg$county %>%
+  mutate(county_name = gsub(" county", "", tolower(county_name))) %>%
+  left_join(lg$state, by = c("county_state" = "state")) %>%
+  mutate(county_name = gsub("\\.", "", gsub(" ", "", county_name))) %>%
+  mutate(county_name = gsub("'", "", gsub("saint", "st", county_name))) %>%
+  mutate(state_name = tolower(state_name)) %>%
+  select(state_zoneid, state_name, county_name, county_state, county_zoneid) %>%
+  # dplyr::filter(cnty_lg, str_detect(county_name, "brien"))
+  left_join(st_drop_geometry(counties), .,
+            by = c("state" = "state_name", "county" = "county_name",
+                   "county_zoneid")) %>%
+  select(state_abb, county, county_zoneid)
 
-  cc       <- st_point_on_surface(counties)
-  counties <- sf::st_interpolate_aw(hu8s["pctnotil"], counties, extensive = FALSE)
-  counties <- st_join(counties, cc)
-  counties <- left_join(counties, cnty_lg, by = c("state_abb", "county"))
+cc       <- st_point_on_surface(counties)
+counties <- sf::st_interpolate_aw(hu8s["pctnotil"], counties, extensive = FALSE)
+counties <- st_join(counties, cc)
+counties <- left_join(counties, cnty_lg, by = c("state_abb", "county"))
 
-  counties <- mutate(counties,
-                     pctnotil_cat = cut(counties$pctnotil, breaks = break_cuts))
-  saveRDS(counties, "data/counties_tillage.rds")
-}
+counties <- mutate(counties,
+                   pctnotil_cat = cut(counties$pctnotil, breaks = break_cuts))
+saveRDS(counties, "data/counties_tillage.rds")
 
-if(!file.exists("data/hu4_tillage.rds")){
-  hu4_pctnotil <- hu8s %>%
-    mutate(HUC4 = substring(HUC8, 0, 4)) %>%
-    mutate(notilarea_j = pctnotil * Shape_Area) %>%
-    group_by(HUC4) %>%
-    summarize(pctnotil = sum(notilarea_j, na.rm = TRUE) / sum(Shape_Area)) %>%
-    st_drop_geometry()
+# create hu4_tillage.rds
+hu4_pctnotil <- hu8s %>%
+  mutate(HUC4 = substring(HUC8, 0, 4)) %>%
+  mutate(notilarea_j = pctnotil * Shape_Area) %>%
+  group_by(HUC4) %>%
+  summarize(pctnotil = sum(notilarea_j, na.rm = TRUE) / sum(Shape_Area)) %>%
+  st_drop_geometry()
 
-  hu4s <- hu4s %>%
-    left_join(hu4_pctnotil) %>%
-    mutate(pctnotil_cat = cut(pctnotil, breaks = break_cuts))
-  saveRDS(hu4s, "data/hu4_tillage.rds")
-}
+hu4s <- hu4s %>%
+  left_join(hu4_pctnotil) %>%
+  mutate(pctnotil_cat = cut(pctnotil, breaks = break_cuts))
+saveRDS(hu4s, "data/hu4_tillage.rds")
