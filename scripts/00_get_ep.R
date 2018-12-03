@@ -64,7 +64,7 @@ ep_fake     <- tillage_hu8 %>%
   st_drop_geometry() %>%
   dplyr::select(ZoneID, HUC8, pctnotil) %>%
   mutate(ep_fake = range01((pctnotil / 100) +
-                             rnorm(nrow(tillage_hu8), sd = 0.2)) * 100) %>%
+                             rnorm(nrow(tillage_hu8), sd = 0.1)) * 100) %>%
   dplyr::rename(hu8_zoneid = ZoneID) %>%
   dplyr::select(-pctnotil) %>%
   left_join(dplyr::select(lg$locus, lagoslakeid,
@@ -77,7 +77,8 @@ ep_fake     <- tillage_hu8 %>%
   left_join(dplyr::select(st_drop_geometry(hu8_tillage), ZoneID, pctnotil),
             by = c("hu8_zoneid" = "ZoneID")) %>%
   rename(pctnotil_hu8 = pctnotil) %>%
-  left_join(dplyr::select(st_drop_geometry(counties_tillage), county_zoneid, pctnotil),
+  left_join(dplyr::select(st_drop_geometry(counties_tillage),
+                          county_zoneid, pctnotil),
             by = c("county_zoneid")) %>%
   drop_na(pctnotil) %>%
   rename(pctnotil_county = pctnotil) %>%
