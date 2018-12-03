@@ -13,6 +13,9 @@ data/counties_tillage.rds: scripts/00_get_gis.R
 data/ep_nutr.rds: scripts/00_get_ep.R
 	Rscript $<
 
+data/ep_fake.rds: scripts/00_get_ep.R data/hu8_tillage.rds
+	Rscript $<
+
 figures: data manuscript/figures.pdf
 
 manuscript/figures.pdf: manuscript/figures.Rmd figures/01_size-comparison-1.pdf figures/02_tillage_map-1.pdf figures/03_scatter_plot-1.pdf

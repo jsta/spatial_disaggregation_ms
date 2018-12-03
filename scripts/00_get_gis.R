@@ -103,7 +103,8 @@ cnty_lg <- lg$county %>%
 cc       <- st_point_on_surface(counties)
 counties <- sf::st_interpolate_aw(hu8s["pctnotil"], counties, extensive = FALSE)
 counties <- st_join(counties, cc)
-counties <- left_join(counties, cnty_lg, by = c("state_abb", "county"))
+counties <- left_join(counties, cnty_lg, by = c("state_abb", "county",
+                                                "county_zoneid"))
 
 counties <- mutate(counties,
                    pctnotil_cat = cut(counties$pctnotil, breaks = break_cuts))

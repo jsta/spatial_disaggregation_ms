@@ -19,6 +19,20 @@ knitr::read_chunk("../scripts/99_utils.R")
 ```
 
 ```{r 03_scatter_plot, echo=FALSE, warning=FALSE, fig.width = 5.5, fig.height = 3}
+ep_fake <- readRDS("../data/ep_fake.rds")
+
+# cowplot of tp vs notill
+plot_grid(
+ggplot() + 
+  geom_point(data = ep_fake, aes(x = pctnotil_hu4, y = ep_fake)),
+ggplot() + 
+  geom_point(data = ep_fake, aes(x = pctnotil_hu8, y = ep_fake)),
+ggplot() + 
+  geom_point(data = ep_fake, aes(x = pctnotil_county, y = ep_fake))
+)
+```
+
+```{r ep_real_vs_pctnotil, echo=FALSE, warning=FALSE, fig.width = 5.5, fig.height = 3, eval=FALSE}
 gpkg_path <- "../data/gis.gpkg"
 hu4s             <- st_read(gpkg_path, layer = "hu4s", stringsAsFactors = FALSE)
 hu4_tillage      <- readRDS("../data/hu4_tillage.rds")
