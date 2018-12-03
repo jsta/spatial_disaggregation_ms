@@ -1,0 +1,82 @@
+---
+title: "Figures"
+output:
+  pdf_document:
+    fig_caption: yes
+---
+
+```{r setup_04, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.path = "../figures/", fig.width = 5, fig.height = 6)
+```
+
+```{r read_chunks_04, cache=FALSE, echo=FALSE}
+# setwd("scripts"); source("../scripts/99_utils.R")
+knitr::read_chunk("../scripts/99_utils.R")
+```
+
+```{r source_utils, message=FALSE, results='hide', echo=FALSE, warning=FALSE}
+
+```
+
+```{r 04_variograms, echo=FALSE, warning=FALSE, fig.width = 5.5, fig.height = 3}
+ep_fake <- readRDS("../data/ep_fake.rds")
+
+hu8 <- ep_fake %>%
+    dplyr::select(ep_fake, contains("hu8")) %>%
+    dplyr::filter(!duplicated(hu8_zoneid)) %>%
+    coordinatize(latname = "hu8_lat", longname = "hu8_long") %>%
+    st_transform(crs = LAGOSNEgis:::albers_conic())
+
+hu4 <- ep_fake %>%
+    dplyr::select(ep_fake, contains("hu4")) %>%
+    dplyr::filter(!duplicated(hu4_zoneid)) %>%
+    coordinatize(latname = "hu4_lat", longname = "hu4_long") %>%
+    st_transform(crs = LAGOSNEgis:::albers_conic())
+
+county <- ep_fake %>%
+    dplyr::select(ep_fake, contains("county"), contains("conty")) %>%
+    dplyr::filter(!duplicated(county_zoneid)) %>%
+    coordinatize(latname = "county_lat", longname = "conty_long") %>%
+    st_transform(crs = LAGOSNEgis:::albers_conic())
+
+make_variograms <- function(dt){
+  var1   <- variogram(
+    as.formula(paste0(names(dt)[grep("pctnotil", names(dt))], 
+                      "~ coords.x1 + coords.x2")), 
+                      data = as_Spatial(dt))
+  v.fit1 <- fit.variogram(var1, vgm(psill = 50, model = "Exp", 
+                                    range = 500000, nugget = 50))
+  preds1  <- variogramLine(v.fit1, maxdist = max(var1$dist))
+  
+  var2 <- variogram(ep_fake ~ coords.x1 + coords.x2, 
+                      data = as_Spatial(dt))
+  v.fit2 <- fit.variogram(var2, vgm(psill = 50, model = "Exp", 
+                                    range = 500000, nugget = 50))
+  preds2  <- variogramLine(v.fit2, maxdist = max(var1$dist))  
+  
+  list(var1 = var1, var2 = var2, preds1 = preds1, preds2 = preds2)
+}  
+
+hu8_v <- make_variograms(hu8)
+hu4_v <- make_variograms(hu4)
+county_v <- make_variograms(county)
+
+plot_grid(
+ggplot() +
+  geom_point(data = hu8_v$var1, aes(x = dist, y = gamma)) +
+  geom_line(data = hu8_v$preds1, aes(x = dist, y = gamma)) + 
+  geom_point(data = hu8_v$var2, aes(x = dist, y = gamma), color = "darkgreen") + 
+  geom_line(data = hu8_v$preds2, aes(x = dist, y = gamma), color = "darkgreen"),
+ggplot() +
+  geom_point(data = hu4_v$var1, aes(x = dist, y = gamma)) +
+  geom_line(data = hu4_v$preds1, aes(x = dist, y = gamma)) + 
+  geom_point(data = hu4_v$var2, aes(x = dist, y = gamma), color = "darkgreen") + 
+  geom_line(data = hu4_v$preds2, aes(x = dist, y = gamma), color = "darkgreen"),
+ggplot() +
+  geom_point(data = county_v$var1, aes(x = dist, y = gamma)) +
+  geom_line(data = county_v$preds1, aes(x = dist, y = gamma)) + 
+  geom_point(data = county_v$var2, aes(x = dist, y = gamma), color = "darkgreen") + 
+  geom_line(data = county_v$preds2, aes(x = dist, y = gamma), color = "darkgreen")
+)
+
+```
