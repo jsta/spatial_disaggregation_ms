@@ -23,22 +23,25 @@ ep_fake <- readRDS("../data/ep_fake.rds")
 
 # cowplot of tp vs notill
 plot_grid(
+  # county
 ggplot() + 
-  geom_point(data = ep_fake, aes(x = pctnotil_hu4, y = ep_fake), 
-             size = 0.3) + 
+  geom_point(data = ep_fake, aes(x = pctnotil_county, y = ep_fake), 
+             size = 0.3) +
   ylab("y") + xlab("tillage percent"),
+# hu8
 ggplot() + 
   geom_point(data = ep_fake, aes(x = pctnotil_hu8, y = ep_fake), 
              size = 0.3) + 
   theme(axis.text.y = element_blank(), 
         axis.title.y = element_blank()) +
   ylab("y") + xlab("tillage percent"),
+# hu4
 ggplot() + 
-  geom_point(data = ep_fake, aes(x = pctnotil_county, y = ep_fake), 
-             size = 0.3) +
+  geom_point(data = ep_fake, aes(x = pctnotil_hu4, y = ep_fake), 
+             size = 0.3) + 
   theme(axis.text.y = element_blank(), 
         axis.title.y = element_blank()) +
-  ylab("y") + xlab("tillage percent"), 
+  ylab("y") + xlab("tillage percent"),
 nrow = 1, rel_widths = c(1, 0.75, 0.75))
 ```
 
@@ -74,12 +77,12 @@ ep <- ep_raw %>%
 
 # cowplot of tp vs notill
 plot_grid(
-ggplot() + 
-  geom_point(data = ep, aes(x = pctnotil_hu4, y = tn)),
-ggplot() + 
-  geom_point(data = ep, aes(x = pctnotil_hu8, y = tn)),
-ggplot() + 
-  geom_point(data = ep, aes(x = pctnotil_county, y = tn))
+  ggplot() + 
+    geom_point(data = ep, aes(x = pctnotil_county, y = tn)),
+  ggplot() + 
+    geom_point(data = ep, aes(x = pctnotil_hu8, y = tn)),
+  ggplot() + 
+    geom_point(data = ep, aes(x = pctnotil_hu4, y = tn))
 )
 
 ```

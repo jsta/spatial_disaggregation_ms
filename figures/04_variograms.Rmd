@@ -65,11 +65,18 @@ theme_opts <- theme(axis.text.x = element_text(angle = 90))
 
 plot_grid(
 ggplot() +
+  geom_point(data = county_v$var1, aes(x = dist, y = gamma)) +
+  geom_line(data = county_v$preds1, aes(x = dist, y = gamma)) + 
+  geom_point(data = county_v$var2, aes(x = dist, y = gamma), color = "darkgreen") + 
+  geom_line(data = county_v$preds2, aes(x = dist, y = gamma), color = "darkgreen") +
+  theme_opts, 
+ggplot() +
   geom_point(data = hu8_v$var1, aes(x = dist, y = gamma)) +
   geom_line(data = hu8_v$preds1, aes(x = dist, y = gamma)) + 
   geom_point(data = hu8_v$var2, aes(x = dist, y = gamma), color = "darkgreen") + 
   geom_line(data = hu8_v$preds2, aes(x = dist, y = gamma), color = "darkgreen") +
-  theme_opts,
+  theme_opts + theme(axis.text.y = element_blank(), 
+                     axis.title.y = element_blank()),
 ggplot() +
   geom_point(data = hu4_v$var1, aes(x = dist, y = gamma)) +
   geom_line(data = hu4_v$preds1, aes(x = dist, y = gamma)) + 
@@ -77,13 +84,6 @@ ggplot() +
   geom_line(data = hu4_v$preds2, aes(x = dist, y = gamma), color = "darkgreen") + 
   theme_opts + theme(axis.text.y = element_blank(), 
                      axis.title.y = element_blank()),
-ggplot() +
-  geom_point(data = county_v$var1, aes(x = dist, y = gamma)) +
-  geom_line(data = county_v$preds1, aes(x = dist, y = gamma)) + 
-  geom_point(data = county_v$var2, aes(x = dist, y = gamma), color = "darkgreen") + 
-  geom_line(data = county_v$preds2, aes(x = dist, y = gamma), color = "darkgreen") +
-  theme_opts + theme(axis.text.y = element_blank(), 
-                     axis.title.y = element_blank()), 
 nrow = 1, rel_widths = c(1, 0.75, 0.75))
 
 ```
