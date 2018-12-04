@@ -17,15 +17,15 @@ knitr::read_chunk("../scripts/99_utils.R")
 
 ```
 
-```{r 01_size-comparison, echo=FALSE, warning=FALSE, fig.width = 5.5, fig.height = 2.5, message=FALSE}
+```{r 01_size-comparison, echo=FALSE, warning=FALSE, fig.width = 5.5, fig.height = 2.2, message=FALSE}
 # ---- size_comparison ----
 # setwd("scripts"); source("../scripts/99_utils.R")
 gpkg_path <- "../data/gis.gpkg"
-states   <- st_read(gpkg_path, layer = "states", stringsAsFactors = FALSE)
-hu4s     <- st_read(gpkg_path, layer = "hu4s", stringsAsFactors = FALSE)
-hu8s     <- st_read(gpkg_path, layer = "hu8s", stringsAsFactors = FALSE)
-counties <- st_read(gpkg_path, layer = "counties", stringsAsFactors = FALSE)
-iws      <- st_read(gpkg_path, layer = "iws", stringsAsFactors = FALSE)
+states   <- st_read(gpkg_path, layer = "states", stringsAsFactors = FALSE, quiet = TRUE)
+hu4s     <- st_read(gpkg_path, layer = "hu4s", stringsAsFactors = FALSE, quiet = TRUE)
+hu8s     <- st_read(gpkg_path, layer = "hu8s", stringsAsFactors = FALSE, quiet = TRUE)
+counties <- st_read(gpkg_path, layer = "counties", stringsAsFactors = FALSE, quiet = TRUE)
+iws      <- st_read(gpkg_path, layer = "iws", stringsAsFactors = FALSE, quiet = TRUE)
 
 q          <- seq(0, 1, length.out = 20)
 res        <- lapply(list(hu4s, counties, iws, hu8s),
@@ -73,5 +73,5 @@ plot_grid(
                  axis.text.y = element_blank()) +
     ylab(""), 
   legend,
-  nrow = 1)
+  nrow = 1, rel_widths = c(1, 0.75, 0.4))
 ```

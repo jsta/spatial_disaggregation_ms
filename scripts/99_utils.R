@@ -21,7 +21,8 @@ theme_opts <- theme(axis.text = element_blank(),
                     panel.background = element_blank(),
                     legend.text = element_text(size = 8),
                     legend.title = element_text(size = 10),
-                    legend.key.size = unit(0.7, "line"))
+                    legend.key.size = unit(0.7, "line"),
+                    plot.margin = unit(c(0, -0.13, 0, -0.13), "cm"))
                     # plot.margin = unit(c(0, 0, -2, 0), "cm")) # t, r, b, l
 
 signif_star <- function(x){
