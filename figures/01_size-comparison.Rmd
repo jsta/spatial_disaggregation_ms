@@ -17,7 +17,7 @@ knitr::read_chunk("../scripts/99_utils.R")
 
 ```
 
-```{r 01_size-comparison, echo=FALSE, warning=FALSE, fig.width = 5.5, fig.height = 2.2, message=FALSE}
+```{r 01_size-comparison, echo=FALSE, warning=FALSE, fig.width = 5.2, fig.height = 2.2, message=FALSE}
 # ---- size_comparison ----
 # setwd("scripts"); source("../scripts/99_utils.R")
 gpkg_path <- "../data/gis.gpkg"
@@ -40,8 +40,9 @@ theme_opts <- theme_minimal() +
   theme(axis.title = element_text(size = 12),
         axis.text.x = element_text(size = 10, angle = 90),
         axis.text.y = element_text(size = 10),
-        legend.text = element_text(size = 10), 
-        axis.line = element_line())
+        legend.text = element_text(size = 8), 
+        axis.line = element_line(), 
+        plot.margin = unit(c(0, -0.13, 0, -0.13), "cm"))
 
 color_key <- setNames(viridis::viridis(4), 
                       c("iws", "county", "hu8s", "hu4"))
@@ -72,6 +73,7 @@ plot_grid(
   g_full + theme(legend.position = "none", 
                  axis.text.y = element_blank()) +
     ylab(""), 
-  legend,
-  nrow = 1, rel_widths = c(1, 0.75, 0.4))
+  plot_grid(NULL, legend, NULL, ncol = 1, rel_heights = c(0.2, 1, 0.4)) + 
+    theme(legend.box.margin = unit(c(0, -0.4, 0, -0.13), "cm")),
+  nrow = 1, rel_widths = c(1, 1, 0.6), align = "v")
 ```
