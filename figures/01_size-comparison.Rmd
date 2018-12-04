@@ -33,8 +33,8 @@ res        <- lapply(list(hu4s, counties, iws, hu8s),
 names(res) <- c("hu4", "county", "iws", "hu8s")
 res        <- dplyr::bind_rows(res) %>%
   mutate(q = q) %>%
-  tidyr::gather(key = "scale", value = "area", -q)
-
+  tidyr::gather(key = "scale", value = "area", -q) %>%
+  mutate(scale = factor(scale, levels = c("iws", "county", "hu8s", "hu4")))
 
 theme_opts <- theme_minimal() +
   theme(axis.title = element_text(size = 12),
