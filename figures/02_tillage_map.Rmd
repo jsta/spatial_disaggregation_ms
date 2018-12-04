@@ -18,7 +18,7 @@ knitr::read_chunk("../scripts/99_utils.R")
 
 ```
 
-```{r 02_tillage_map, echo=FALSE, warning=FALSE, fig.width = 5.5, fig.height = 4}
+```{r 02_tillage_map, echo=FALSE, warning=FALSE, fig.width = 5.5, fig.height = 7}
 # setwd("../")
 hu4s     <- readRDS("../data/hu4_tillage.rds")
 hu8s     <- readRDS("../data/hu8_tillage.rds")
@@ -49,9 +49,9 @@ g_hu4 <- ggplot() +
   theme_opts
 legend <- get_legend(g_hu8)
 
-plot_grid(g_hu4 + theme(legend.position = "none"),
-          g_hu8 + theme(legend.position = "none"), 
-          g_counties + theme(legend.position = "none"), 
+plot_grid(g_counties + theme(legend.position = "none"), 
+          g_hu8 + theme(legend.position = "none"),
+          g_hu4 + theme(legend.position = "none"),
           legend, 
           nrow = 1)
 ```
