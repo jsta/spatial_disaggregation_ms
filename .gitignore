@@ -1,1 +1,6 @@
 FOR870_Paper.pdf
+figures/*.tex
+data/*.rds
+data/*.gpkg
+figures/*.pdf
+manuscript/*.tex
