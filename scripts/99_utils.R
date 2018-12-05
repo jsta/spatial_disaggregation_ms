@@ -1,3 +1,9 @@
+#' 99_utils.R
+#' =======================================================
+#+ setup, include=FALSE
+knitr::opts_chunk$set(eval = FALSE)
+#+
+
 
 # ---- source_utils ----
 

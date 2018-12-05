@@ -34,3 +34,6 @@ figures/03_scatter_plot-1.pdf: figures/03_scatter_plot.Rmd
 
 figures/04_variograms-1.pdf: figures/04_variograms.Rmd
 	Rscript -e "rmarkdown::render('$<', output_format = 'pdf_document')"
+
+code.pdf: manuscript/code-pdf_source/extract_rsource.R
+	Rscript $<

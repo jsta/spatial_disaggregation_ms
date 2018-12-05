@@ -1,3 +1,10 @@
+#' hpcc.R
+#' =======================================================
+#+ setup, include=FALSE
+knitr::opts_chunk$set(eval = FALSE)
+#+
+
+
 # Merge estimates of conservation tillage with geospatial polygons
 # Duplicates the behavior of: $ make data/hu8_tillage.rds
 

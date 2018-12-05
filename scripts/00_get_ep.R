@@ -1,3 +1,10 @@
+#' 00_get_ep.R
+#' =======================================================
+#+ setup, include=FALSE
+knitr::opts_chunk$set(eval = FALSE)
+#+
+
+
 suppressMessages(library(dplyr))
 library(magrittr)
 library(LAGOSNE)

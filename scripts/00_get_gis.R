@@ -1,3 +1,10 @@
+#' 00_get_gis.R
+#' =======================================================
+#+ setup, include=FALSE
+knitr::opts_chunk$set(eval = FALSE)
+#+
+
+
 # setwd("../")
 source("scripts/99_utils.R")
 
