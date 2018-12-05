@@ -74,7 +74,7 @@ get_states <- function(bbox){
   state_sf$ABB
 }
 
-Rmd_bind <-  function(dir = ".",
+Rmd_bind <- function(dir = ".",
            book_header = readLines(textConnection("---\ntitle: 'Title'\n---")))
   {
     old <- setwd(dir)
