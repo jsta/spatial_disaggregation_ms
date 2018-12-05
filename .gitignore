@@ -7,3 +7,4 @@ manuscript/*.tex
 .Rproj.user
 *.tar.gz
 .Rhistory
+manuscript/code-pdf_source/*.md
