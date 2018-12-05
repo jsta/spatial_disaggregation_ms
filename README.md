@@ -18,6 +18,8 @@ Figures: [manuscript/figures.pdf](manuscript/figures.pdf)
 
 * `LAGOSNEgis`
 * `macroag`
+* `vapour`
+* `LAGOSNE`
 
 #### System requirements
 
