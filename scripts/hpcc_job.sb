@@ -1,0 +1,25 @@
+#!/bin/bash -login
+# how long?
+#SBATCH --time=01:00:00
+# how much memory?
+#SBATCH --mem=5gb
+# specify resources needed.
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=2
+#SBATCH --constraint=intel16
+
+# load HPC Modules, then run R commandline with the Rscript command
+
+module purge
+module load powertools
+module load foss/2018b
+module load GCC/7.3.0-2.30
+module load OpenMPI/3.1.1
+module load git/2.18.0
+module load UDUNITS/2.2.26
+module load R/3.5.1-X11-20180604
+Rscript hpcc.R
+
+# get information about this job put IN YOUR output
+scontrol show jobid -dd $SLURM_JOBID
