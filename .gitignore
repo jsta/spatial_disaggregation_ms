@@ -5,3 +5,5 @@ data/*.gpkg
 figures/*.pdf
 manuscript/*.tex
 .Rproj.user
+*.tar.gz
+.Rhistory
