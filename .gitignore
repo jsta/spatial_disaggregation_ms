@@ -4,3 +4,4 @@ data/*.rds
 data/*.gpkg
 figures/*.pdf
 manuscript/*.tex
+.Rproj.user
