@@ -10,9 +10,6 @@ data/gis.gpkg: scripts/00_get_gis.R
 data/counties_tillage.rds: scripts/00_get_gis.R
 	Rscript $<
 
-data/ep_nutr.rds: scripts/00_get_ep.R
-	Rscript $<
-
 data/ep_fake.rds: scripts/00_get_ep.R data/hu8_tillage.rds
 	Rscript $<
 
