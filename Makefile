@@ -1,6 +1,9 @@
 .PHONY: all figures data
 
-all: data figures manuscript/figures_source.pdf
+all: manuscript/all.pdf
+
+manuscript/all.pdf: data figures manuscript/figures_source.pdf
+	pdftk manuscript/figures.pdf manuscript/figures_source.pdf manuscript/code_source.pdf cat output manuscript/all.pdf
 
 data: data/gis.gpkg data/ep_nutr.rds data/counties_tillage.rds
 
