@@ -53,9 +53,12 @@ g_hu4 <- ggplot() +
   theme_opts
 legend <- get_legend(g_hu8)
 
-plot_grid(g_counties + theme(legend.position = "none"), 
-          g_hu8 + theme(legend.position = "none"),
-          g_hu4 + theme(legend.position = "none"),
+plot_grid(g_counties + theme(legend.position = "none") + ggtitle("A. County") + 
+            theme(title = element_text(hjust = 0.1)), 
+          g_hu8 + theme(legend.position = "none") + ggtitle("B. Subbasin") + 
+            theme(title = element_text(hjust = 0.1)),
+          g_hu4 + theme(legend.position = "none") + ggtitle("C. Subregion") + 
+            theme(title = element_text(hjust = 0.1)),
           legend, 
           nrow = 1)
 ```

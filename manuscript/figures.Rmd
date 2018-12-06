@@ -25,5 +25,5 @@ knitr::include_graphics("../figures/03_scatter_plot-1.pdf")
 ```
 
 ```{r variograms, fig.cap="Variograms", echo=FALSE, out.height = "3.7in"}
-knitr::include_graphics("../figures/04_variograms-1.pdf")
+knitr::include_graphics("../figures/04_variograms-2.pdf")
 ```

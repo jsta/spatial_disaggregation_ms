@@ -73,30 +73,39 @@ hu4_v    <- make_variograms(hu4)
 county_v <- make_variograms(county)
 
 theme_opts <- theme(axis.text.x = element_text(angle = 90), 
-                    legend.position = "none")
+                    legend.position = "none", 
+                    plot.title = element_text(hjust = 0.1))
 
 legend <- get_legend(
   ggplot() +
   geom_point(data = county_v$var, aes(x = dist, y = gamma, color = id)) + 
-  theme(legend.direction = "horizontal", 
-        legend.title = element_blank()))
+    theme(legend.direction = "horizontal", 
+        legend.title = element_blank()) +
+  scale_color_viridis_d(labels = c("tillage percent", "y"))
+  )
 
-g <- plot_grid(
+(g <- plot_grid(
 ggplot() +
   geom_point(data = county_v$var, aes(x = dist, y = gamma, color = id)) +
   geom_line(data = county_v$preds, aes(x = dist, y = gamma, color = id)) + 
+  scale_color_viridis_d(labels = c("tillage percent", "y")) +
+  ggtitle("A. County") +
   theme_opts, 
 ggplot() +
   geom_point(data = hu8_v$var, aes(x = dist, y = gamma, color = id)) +
   geom_line(data = hu8_v$preds, aes(x = dist, y = gamma, color = id)) + 
+  scale_color_viridis_d(labels = c("tillage percent", "y")) +
+  ggtitle("B. Subbasin") +  
   theme_opts + theme(axis.text.y = element_blank(), 
                      axis.title.y = element_blank()),
 ggplot() +
   geom_point(data = hu4_v$var, aes(x = dist, y = gamma, color = id)) +
   geom_line(data = hu4_v$preds, aes(x = dist, y = gamma, color = id)) + 
+  scale_color_viridis_d(labels = c("tillage percent", "y")) +
+  ggtitle("C. Subregion") + 
   theme_opts + theme(axis.text.y = element_blank(), 
                      axis.title.y = element_blank()),
-nrow = 1, rel_widths = c(1, 0.75, 0.75))
+nrow = 1, rel_widths = c(1, 0.75, 0.75)))
 
 plot_grid(g,
           plot_grid(NULL, legend, NULL, nrow = 1), 

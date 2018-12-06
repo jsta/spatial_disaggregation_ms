@@ -51,7 +51,7 @@ color_key <- setNames(viridis::viridis(4),
 
 g_full <- ggplot() +
   geom_line(data = res, aes(x = area, y = rev(q), color = scale), size = 1.5) +
-  ylab("Density") + xlab("Area (m2)") +
+  ylab("Density") + xlab(bquote('Area ('*m^2~')')) +
   scale_x_continuous(labels = c("2^10", "10^10", "11^10", "12^10"),
                      breaks = c(10^2, 10^10, 11^10, 12^10)) +
   scale_color_manual(values = color_key) +
@@ -61,7 +61,7 @@ g_full <- ggplot() +
 g_zoom <- ggplot() +
   geom_line(data = dplyr::filter(res, scale %in% c("iws", "county", "hu8s")), 
             aes(x = area, y = rev(q), color = scale), size = 1.5) +
-  ylab("Density") + xlab("Area (m2)") +
+  ylab("Density") + xlab(bquote('Area ('*m^2~')')) +
   scale_x_continuous(labels = c("2^10", "10^10"),
                      breaks = c(2^10, 10^10)) + 
   scale_color_manual(values = color_key) +
@@ -77,5 +77,6 @@ plot_grid(
     ylab(""), 
   plot_grid(NULL, legend, NULL, ncol = 1, rel_heights = c(0.2, 1, 0.4)) + 
     theme(legend.box.margin = unit(c(0, -0.4, 0, -0.13), "cm")),
-  nrow = 1, rel_widths = c(1, 1, 0.6), align = "v")
+  nrow = 1, rel_widths = c(1, 1, 0.6), align = "v", 
+  labels = c("A.", "B.", ""), hjust = c(-9.7, -9.8, 0))
 ```
