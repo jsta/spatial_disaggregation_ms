@@ -7,8 +7,10 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.path = "../figures/", fig.width = 5, fig.height = 6, fig.align='center', dev = c("pdf"))
+knitr::opts_chunk$set(echo = TRUE, fig.path = "../figures/", fig.width = 5, fig.height = 6)
 ```
+
+\newpage
 
 ```{r size_comparison, fig.cap="Cross-scale unit area comparison", echo=FALSE}
 knitr::include_graphics("../figures/01_size-comparison-1.pdf")
