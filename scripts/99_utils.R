@@ -80,22 +80,113 @@ get_states <- function(bbox){
   state_sf$ABB
 }
 
-Rmd_bind <- function(dir = ".",
-           book_header = readLines(textConnection("---\ntitle: 'Title'\n---")))
-  {
-    old <- setwd(dir)
-    if(length(grep("book.Rmd", list.files())) > 0){
-      warning("book.Rmd already exists")
-    }
-    write(book_header, file = "book.Rmd", )
-    cfiles <- list.files(pattern = "*.Rmd", )
-    ttext <- NULL
-    for(i in 1:length(cfiles)){
-      text <- readLines(cfiles[i])
-      hspan <- grep("---", text)
-      text <- text[-c(hspan[1]:hspan[2])]
-      write(text, sep = "\n", file = "book.Rmd", append = T)
-    }
-    rmarkdown::render("book.Rmd", output_format = "pdf_document")
-    setwd(old)
+# https://gist.github.com/gadenbuie/284671997992aefe295bed34bb53fde6
+backstitch <- function(
+  infile,
+  outfile = NULL,
+  output_type = c('both'),
+  chunk_header = "# ----"
+) {
+  requireNamespace('knitr', quietly = TRUE)
+  requireNamespace('stringr', quietly = TRUE)
+  stopifnot(output_type %in% c('script', 'code', 'both'))
+
+  if (is.null(outfile) && output_type == 'both')
+    stop("Please choose output_type of 'script' or 'code' when not outputting to a file.")
+
+  knitr::knit_patterns$set(knitr::all_patterns[['md']])
+
+  x <- readLines(infile)
+  if (inherits(infile, 'connection')) close(infile)
+
+  empty_lines <- which(stringr::str_detect(x, "^\\s?+$"))
+  last_non_empty_line <- max(setdiff(seq_along(x), empty_lines))
+  x <- x[1:last_non_empty_line]
+
+  x_type <- rep('text', length(x))
+
+  # Find YAML section
+  yaml_markers <- which(stringr::str_detect(x, "^[-.]{3}\\s*$"))
+  if (length(yaml_markers) > 2) {
+    message("Input file may have multiple YAML chunks, only considering lines",
+            paste(yaml_markers[1:2], collapse='-'), 'as YAML header.')
   }
+  if (length(yaml_markers) > 0) {
+    i.yaml <- yaml_markers[1]:yaml_markers[2]
+    x_type[i.yaml] <- 'yaml'
+  }
+
+  # Mark code chunk.begin, chunk.end and regular chunk codelines
+  i.chunk.begin <- which(stringr::str_detect(x, knitr::knit_patterns$get('chunk.begin')))
+  i.chunk.end   <- which(stringr::str_detect(x, knitr::knit_patterns$get('chunk.end')))
+  x_type[i.chunk.end] <- 'chunk.end'
+  for (j in i.chunk.begin) {
+    j.chunk.end <- min(i.chunk.end[i.chunk.end > j])-1
+    x_type[j:j.chunk.end] <- 'chunk'
+  }
+  x_type[i.chunk.begin] <- 'chunk.begin'
+
+  # Check for inline code
+  i.inline <- which(stringr::str_detect(x, knitr::knit_patterns$get('inline.code')))
+  i.inline <- intersect(i.inline, which(x_type == 'text'))
+  x_type[i.inline] <- 'inline'
+
+  # Check empty lines
+  i.empty <- which(stringr::str_detect(x, "^\\s*$"))
+  i.empty <- intersect(i.empty, which(x_type == 'text'))
+  x_type[i.empty] <- 'empty'
+
+  really_empty <- function(x_type, j, n = -1) {
+    if (grepl('(chunk|yaml)', x_type[j + n])) {
+      return('empty')
+    } else if (n < 0) {
+      return(really_empty(x_type, j, 1))
+    } else if (x_type[j + n] %in% c('text', 'inline')) {
+      return('text')
+    } else {
+      return(really_empty(x_type, j, n+1))
+    }
+  }
+
+  for (j in i.empty) {
+    x_type[j] <- really_empty(x_type, j)
+  }
+
+  # Rewrite lines helper functions
+  comment <- function(x) paste("#'", x)
+  make_chunk_header <- function(x, chunk_header) {
+    stringr::str_replace(stringr::str_replace(x, knitr::knit_patterns$get('chunk.begin'), "\\1"),
+                         "^r[, ]?", paste(chunk_header, ""))
+  }
+  # Rewrite lines
+  y <- x
+  regex_inline_grouped <- "`r[ ]?#?(([^`]+)\\s*)`"
+  i.empty       <- which(x_type == 'empty')
+  i.text        <- which(x_type == 'text')
+  y[i.chunk.begin] <- make_chunk_header(x[i.chunk.begin], chunk_header)
+  y[i.inline]      <- comment(stringr::str_replace_all(x[i.inline], regex_inline_grouped, "{{\\1}}"))
+  y[i.text]        <- comment(x[i.text])
+  if (length(yaml_markers) > 0) y[i.yaml] <- comment(x[i.yaml])
+  y[i.empty]       <- ""
+  y[i.chunk.end]   <- ""
+
+  y_code <- y[which(stringr::str_detect(x_type, 'chunk'))]
+
+  if (!is.null(outfile)){
+    outfile_name <- stringr::str_replace(outfile, "(.+)\\.R$", "\\1")
+    if (output_type == "script") {
+      cat(c(y, ""), file = paste0(outfile_name, ".R"), sep = '\n')
+    } else if (output_type == "code") {
+      cat(c(y_code, ""), file = paste0(outfile_name, ".R"), sep = '\n')
+    } else {
+      cat(c(y, ""), file = paste0(outfile_name, ".R"), sep = '\n')
+      cat(c(y_code, ""), file = paste0(outfile_name, "_code.R"), sep = '\n')
+    }
+  } else {
+    switch(
+      output_type,
+      'script' = unname(y),
+      'code' = unname(y_code)
+    )
+  }
+}

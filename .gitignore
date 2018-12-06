@@ -8,3 +8,5 @@ manuscript/*.tex
 *.tar.gz
 .Rhistory
 manuscript/code-pdf_source/*.md
+manuscript/figures-pdf_source/*.R
+manuscript/figures-pdf_source/*.md

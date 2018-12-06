@@ -18,7 +18,7 @@ knitr::read_chunk("../scripts/99_utils.R")
 
 ```
 
-```{r 02_tillage_map, echo=FALSE, warning=FALSE, fig.width = 7, fig.height = 7, message=FALSE}
+```{r 02_tillage_map, echo=TRUE, warning=FALSE, fig.width = 7, fig.height = 7, message=FALSE}
 # setwd("../")
 hu4s     <- readRDS("../data/hu4_tillage.rds")
 hu8s     <- readRDS("../data/hu8_tillage.rds")

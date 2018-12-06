@@ -1,6 +1,6 @@
 .PHONY: all figures data
 
-all: data figures
+all: data figures manuscript/figures_source.pdf
 
 data: data/gis.gpkg data/ep_nutr.rds data/counties_tillage.rds
 
@@ -35,8 +35,13 @@ figures/03_scatter_plot-1.pdf: figures/03_scatter_plot.Rmd
 figures/04_variograms-1.pdf: figures/04_variograms.Rmd
 	Rscript -e "rmarkdown::render('$<', output_format = 'pdf_document')"
 
-manuscript/code.pdf: manuscript/code-pdf_source/extract_rsource.R
+manuscript/code_source.pdf: manuscript/code-pdf_source/extract_rsource.R manuscript/figures.pdf
 	-rm manuscript/code-pdf_source/code.md
 	Rscript $<
 	pandoc -o manuscript/code-pdf_source/code.md manuscript/code-pdf_source/*.md
 	pandoc -o $@ manuscript/code-pdf_source/code.md
+
+manuscript/figures_source.pdf: manuscript/code_source.pdf
+	-rm manuscript/figures-pdf_source/figures.md
+	pandoc -o manuscript/figures-pdf_source/figures.md manuscript/figures-pdf_source/*.md
+	pandoc -o $@ manuscript/figures-pdf_source/figures.md
