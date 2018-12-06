@@ -1,0 +1,13 @@
+---
+output: github_document
+---
+
+# Job script
+```{r hpcc_sb, echo=FALSE, comment=''}
+cat(readLines("../../scripts/hpcc_job.sb"), sep = '\n')
+```
+
+# HPCC (Slurm) output file
+```{r hpcc_slurm, echo=FALSE, comment=''}
+cat(readLines("../../scripts/slurm-2885759.out"), sep = '\n')
+```
