@@ -50,7 +50,7 @@ color_key <- setNames(viridis::viridis(4),
                       c("iws", "county", "hu8s", "hu4"))
 
 g_full <- ggplot() +
-  geom_line(data = res, aes(x = area, y = rev(q), color = scale), size = 1.5) +
+  geom_line(data = res, aes(x = area, y = rev(q), color = scale), size = 1.1) +
   ylab("Density") + xlab(bquote('Area ('*m^2~')')) +
   scale_x_continuous(labels = c("2^10", "10^10", "11^10", "12^10"),
                      breaks = c(10^2, 10^10, 11^10, 12^10)) +
@@ -60,7 +60,7 @@ g_full <- ggplot() +
 
 g_zoom <- ggplot() +
   geom_line(data = dplyr::filter(res, scale %in% c("iws", "county", "hu8s")), 
-            aes(x = area, y = rev(q), color = scale), size = 1.5) +
+            aes(x = area, y = rev(q), color = scale), size = 1.1) +
   ylab("Density") + xlab(bquote('Area ('*m^2~')')) +
   scale_x_continuous(labels = c("2^10", "10^10"),
                      breaks = c(2^10, 10^10)) + 

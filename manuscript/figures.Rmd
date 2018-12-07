@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE, fig.path = "../figures/", fig.width = 5, fig.
 
 \newpage
 
-```{r size_comparison, fig.cap="Cross-scale unit area comparison between A) counties, lakesheds (IWS), subbasins(HUC8s) and B) zoom-ed out to include subregions (HUC4s).", echo=FALSE}
+```{r size_comparison, fig.cap="Cross-scale unit area comparison between A) counties, lakesheds (IWS), subbasins(HUC8s) and B) zoomed out to show comparison with subregions (HUC4).", echo=FALSE}
 knitr::include_graphics("../figures/01_size-comparison-1.pdf")
 ```
 
@@ -24,6 +24,6 @@ knitr::include_graphics("../figures/02_tillage_map-1.pdf")
 knitr::include_graphics("../figures/03_scatter_plot-1.pdf")
 ```
 
-```{r variograms, fig.cap="Variograms", echo=FALSE, out.height = "3.7in"}
+```{r variograms, fig.cap="Variograms showing autocorrelation in conservation tillage (dark line) and y (light line) at the A) county, B) subbasin, and C) subregion scales. Fitted variogram model lines are also shown.", echo=FALSE, out.height = "3.7in"}
 knitr::include_graphics("../figures/04_variograms-2.pdf")
 ```
