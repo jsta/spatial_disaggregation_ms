@@ -56,7 +56,7 @@ make_variograms <- function(dt){
                       data = as_Spatial(dt))
   v.fit2  <- fit.variogram(var2, vgm(psill = 50, model = "Exp", 
                                     range = 500000, nugget = 50))
-  preds2  <- variogramLine(v.fit2, maxdist = max(var1$dist))  
+  preds2  <- variogramLine(v.fit2, maxdist = max(var2$dist))  
   var2    <- mutate(var2, id = "y")
   preds2  <- mutate(preds2, id = "y")
   

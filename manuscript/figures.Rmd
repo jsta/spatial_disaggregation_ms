@@ -12,15 +12,15 @@ knitr::opts_chunk$set(echo = TRUE, fig.path = "../figures/", fig.width = 5, fig.
 
 \newpage
 
-```{r size_comparison, fig.cap="Cross-scale unit area comparison", echo=FALSE}
+```{r size_comparison, fig.cap="Cross-scale unit area comparison between A) counties, lakesheds (IWS), subbasins(HUC8s) and B) zoom-ed out to include subregions (HUC4s).", echo=FALSE}
 knitr::include_graphics("../figures/01_size-comparison-1.pdf")
 ```
 
-```{r tillage_map, fig.cap="Percentage of no till acres", echo=FALSE, out.height = "6in"}
+```{r tillage_map, fig.cap="Percentage of no till acres A) dissagregated to counties, B) original subbasin data, C) aggregated to subregions. ", echo=FALSE, out.height = "6in"}
 knitr::include_graphics("../figures/02_tillage_map-1.pdf")
 ```
 
-```{r scatter_plot, fig.cap="Scatter plot", echo=FALSE, out.height = "4in"}
+```{r scatter_plot, fig.cap="Relationship between y at the subbasin scale and conservation tillage at A) the county scale, B) the subbasin scale, and C) the subregion scale. ", echo=FALSE, out.height = "4in"}
 knitr::include_graphics("../figures/03_scatter_plot-1.pdf")
 ```
 
