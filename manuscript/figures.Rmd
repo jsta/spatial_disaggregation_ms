@@ -20,7 +20,7 @@ knitr::include_graphics("../figures/01_size-comparison-1.pdf")
 knitr::include_graphics("../figures/02_tillage_map-1.pdf")
 ```
 
-```{r scatter_plot, fig.cap="Relationship between y at the subbasin scale and conservation tillage at A) the county scale, B) the subbasin scale, C) the subregion scale. ", echo=FALSE, out.height = "4in"}
+```{r scatter_plot, fig.cap="Relationship between y at the subbasin scale and conservation tillage at A) the county scale, B) the subbasin scale, C) the subregion scale. Line shows the results of a best fit linear regression. ", echo=FALSE, out.height = "4in"}
 knitr::include_graphics("../figures/03_scatter_plot-1.pdf")
 ```
 

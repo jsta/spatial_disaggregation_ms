@@ -48,6 +48,7 @@ make_variograms <- function(dt){
                       data = as_Spatial(dt))
   v.fit1  <- fit.variogram(var1, vgm(psill = 50, model = "Exp", 
                                     range = 500000, nugget = 50))
+  
   preds1  <- variogramLine(v.fit1, maxdist = max(var1$dist))
   preds1  <- mutate(preds1, id = "pctnotil") 
   var1    <- mutate(var1, id = "pctnotil")
@@ -65,12 +66,28 @@ make_variograms <- function(dt){
   suppressWarnings(
     preds <- dplyr::bind_rows(preds1, preds2))
   
-  list(var = var, preds = preds)
+  tidy_variogram <- function(vfit, id){
+      mutate(vfit, 
+             model_name = !!(id), 
+             sill = sum(psill, na.rm = TRUE),
+             nugget = psill[model == "Nug"]) %>%
+        filter(model != "Nug") %>%
+        dplyr::select(model_name, model, range, sill, nugget)
+  }
+  
+  fit_stats <- dplyr::bind_rows(
+    tidy_variogram(v.fit1, id = "pctnotil"),
+    tidy_variogram(v.fit2, id = "y"))
+  
+  list(var = var, preds = preds, fit_stats = fit_stats)
 }  
 
 hu8_v    <- make_variograms(hu8)
+hu8_v$fit_stats
 hu4_v    <- make_variograms(hu4)
+hu4_v$fit_stats
 county_v <- make_variograms(county)
+county_v$fit_stats
 
 theme_opts <- theme(axis.text.x = element_text(angle = 90), 
                     legend.position = "none", 
@@ -95,6 +112,7 @@ ggplot() +
   geom_point(data = hu8_v$var, aes(x = dist, y = gamma, color = id)) +
   geom_line(data = hu8_v$preds, aes(x = dist, y = gamma, color = id)) + 
   scale_color_viridis_d(labels = c("tillage percent", "y")) +
+  # geom_hline(aes(yintercept = 162.9 + 107)) +
   ggtitle("B. Subbasin") +  
   theme_opts + theme(axis.text.y = element_blank(), 
                      axis.title.y = element_blank()),

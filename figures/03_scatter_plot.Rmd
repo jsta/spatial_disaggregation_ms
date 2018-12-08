@@ -23,18 +23,29 @@ knitr::read_chunk("../scripts/99_utils.R")
 ```{r 03_scatter_plot, echo=TRUE, warning=FALSE, fig.width = 5.5, fig.height = 2.5}
 ep_fake <- readRDS("../data/ep_fake.rds")
 
+lm_county <- lm(ep_fake ~ pctnotil_county, data = ep_fake)
+lm_hu8 <- lm(ep_fake ~ pctnotil_hu8, data = ep_fake)
+lm_hu4 <- lm(ep_fake ~ pctnotil_hu4, data = ep_fake)
+
+dplyr::bind_rows(lapply(list(lm_county, lm_hu8, lm_hu4), broom::glance))
+
 # cowplot of tp vs notill
 plot_grid(
   # county
 ggplot() + 
   geom_point(data = ep_fake, aes(x = pctnotil_county, y = ep_fake), 
              size = 0.3) +
+    geom_line(data = fortify(lm_county, ep_fake), 
+            aes(pctnotil_county, .fitted), size = 1.2, color = "grey") +
   ylab("y") + xlab("tillage percent") +
-  ggtitle("A. County"),
+  ggtitle("A. County")
+,
 # hu8
 ggplot() + 
   geom_point(data = ep_fake, aes(x = pctnotil_hu8, y = ep_fake), 
              size = 0.3) + 
+    geom_line(data = fortify(lm_hu8, ep_fake), 
+            aes(pctnotil_hu8, .fitted), size = 1.2, color = "grey") +
   theme(axis.text.y = element_blank(), 
         axis.title.y = element_blank()) +
   ylab("y") + xlab("tillage percent") + 
@@ -43,6 +54,8 @@ ggplot() +
 ggplot() + 
   geom_point(data = ep_fake, aes(x = pctnotil_hu4, y = ep_fake), 
              size = 0.3) + 
+  geom_line(data = fortify(lm_hu4, ep_fake), 
+            aes(pctnotil_hu4, .fitted), size = 1.2, color = "grey") +
   theme(axis.text.y = element_blank(), 
         axis.title.y = element_blank()) +
   ylab("y") + xlab("tillage percent") +
