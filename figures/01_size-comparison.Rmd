@@ -23,11 +23,16 @@ knitr::read_chunk("../scripts/99_utils.R")
 # ---- size_comparison ----
 # setwd("scripts"); source("../scripts/99_utils.R")
 gpkg_path <- "../data/gis.gpkg"
-states   <- st_read(gpkg_path, layer = "states", stringsAsFactors = FALSE, quiet = TRUE)
-hu4s     <- st_read(gpkg_path, layer = "hu4s", stringsAsFactors = FALSE, quiet = TRUE)
-hu8s     <- st_read(gpkg_path, layer = "hu8s", stringsAsFactors = FALSE, quiet = TRUE)
-counties <- st_read(gpkg_path, layer = "counties", stringsAsFactors = FALSE, quiet = TRUE)
-iws      <- st_read(gpkg_path, layer = "iws", stringsAsFactors = FALSE, quiet = TRUE)
+states   <- st_read(gpkg_path, layer = "states", stringsAsFactors = FALSE, 
+                    quiet = TRUE)
+hu4s     <- st_read(gpkg_path, layer = "hu4s", stringsAsFactors = FALSE, 
+                    quiet = TRUE)
+hu8s     <- st_read(gpkg_path, layer = "hu8s", stringsAsFactors = FALSE, 
+                    quiet = TRUE)
+counties <- st_read(gpkg_path, layer = "counties", stringsAsFactors = FALSE, 
+                    quiet = TRUE)
+iws      <- st_read(gpkg_path, layer = "iws", stringsAsFactors = FALSE, 
+                    quiet = TRUE)
 
 q          <- seq(0, 1, length.out = 20)
 res        <- lapply(list(hu4s, counties, iws, hu8s),
@@ -37,6 +42,15 @@ res        <- dplyr::bind_rows(res) %>%
   mutate(q = q) %>%
   tidyr::gather(key = "scale", value = "area", -q) %>%
   mutate(scale = factor(scale, levels = c("iws", "county", "hu8s", "hu4")))
+
+paste0("approximately", 
+       quantile(st_area(hu4s), probs = 0.5) / 
+         quantile(st_area(hu8s), probs = 0.5), 
+       "hu8s fit inside a hu4 at median size")
+paste0("approximately", 
+       quantile(st_area(hu8s), probs = 0.5) / 
+         quantile(st_area(counties), probs = 0.5),
+       "counties fit inside a hu8 at median size")
 
 theme_opts <- theme_minimal() +
   theme(axis.title = element_text(size = 12),
