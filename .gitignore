@@ -11,3 +11,4 @@ manuscript/code-pdf_source/*.md
 manuscript/figures-pdf_source/*.R
 manuscript/figures-pdf_source/*.md
 manuscript/code-pdf_source/*.html
+figures/*.png
