@@ -1,6 +1,6 @@
 Code and data for:
 
-## How does spatial disaggregation and aggregation affect autocorrelation?
+## How does disaggregation affect information loss and spatial autocorrelation?
 
 > Journal Target: Global Ecology and Biogeography
 
