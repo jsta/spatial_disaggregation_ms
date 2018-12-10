@@ -1,7 +1,8 @@
 .PHONY: png grayscale small
 
 png:
-	-mogrify -density 300 -format png -resize 2500x2500\> *.pdf
+	-mogrify -density 300 -format png -resize 2500x2500\> *1.pdf
+	-mogrify -density 300 -format png -resize 2500x2500\> *2.pdf
 	-rm *~
 	echo done
 	
