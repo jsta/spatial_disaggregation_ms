@@ -92,5 +92,5 @@ plot_grid(
   plot_grid(NULL, legend, NULL, ncol = 1, rel_heights = c(0.2, 1, 0.4)) + 
     theme(legend.box.margin = unit(c(0, -0.4, 0, -0.13), "cm")),
   nrow = 1, rel_widths = c(1, 1, 0.6), align = "v", 
-  labels = c("A.", "B.", ""), hjust = c(-9.7, -9.8, 0))
+  labels = c("a.", "b.", ""), hjust = c(-9.7, -9.8, 0))
 ```

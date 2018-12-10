@@ -106,21 +106,21 @@ ggplot() +
   geom_point(data = county_v$var, aes(x = dist, y = gamma, color = id)) +
   geom_line(data = county_v$preds, aes(x = dist, y = gamma, color = id)) + 
   scale_color_viridis_d(labels = c("tillage percent", "y")) +
-  ggtitle("A. County") +
+  ggtitle("a. County") +
   theme_opts, 
 ggplot() +
   geom_point(data = hu8_v$var, aes(x = dist, y = gamma, color = id)) +
   geom_line(data = hu8_v$preds, aes(x = dist, y = gamma, color = id)) + 
   scale_color_viridis_d(labels = c("tillage percent", "y")) +
   # geom_hline(aes(yintercept = 162.9 + 107)) +
-  ggtitle("B. Subbasin") +  
+  ggtitle("b. Subbasin") +  
   theme_opts + theme(axis.text.y = element_blank(), 
                      axis.title.y = element_blank()),
 ggplot() +
   geom_point(data = hu4_v$var, aes(x = dist, y = gamma, color = id)) +
   geom_line(data = hu4_v$preds, aes(x = dist, y = gamma, color = id)) + 
   scale_color_viridis_d(labels = c("tillage percent", "y")) +
-  ggtitle("C. Subregion") + 
+  ggtitle("c. Subregion") + 
   theme_opts + theme(axis.text.y = element_blank(), 
                      axis.title.y = element_blank()),
 nrow = 1, rel_widths = c(1, 0.75, 0.75)))

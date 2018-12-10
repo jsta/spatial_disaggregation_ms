@@ -38,7 +38,7 @@ ggplot() +
     geom_line(data = fortify(lm_county, ep_fake), 
             aes(pctnotil_county, .fitted), size = 1.2, color = "grey") +
   ylab("y") + xlab("tillage percent") +
-  ggtitle("A. County")
+  ggtitle("a. County")
 ,
 # hu8
 ggplot() + 
@@ -49,7 +49,7 @@ ggplot() +
   theme(axis.text.y = element_blank(), 
         axis.title.y = element_blank()) +
   ylab("y") + xlab("tillage percent") + 
-  ggtitle("B. Subbasin"),
+  ggtitle("b. Subbasin"),
 # hu4
 ggplot() + 
   geom_point(data = ep_fake, aes(x = pctnotil_hu4, y = ep_fake), 
@@ -59,6 +59,6 @@ ggplot() +
   theme(axis.text.y = element_blank(), 
         axis.title.y = element_blank()) +
   ylab("y") + xlab("tillage percent") +
-  ggtitle("C. Subregion"),
+  ggtitle("c. Subregion"),
 nrow = 1, rel_widths = c(1, 0.75, 0.75))
 ```
