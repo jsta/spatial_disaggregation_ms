@@ -50,7 +50,13 @@ g_hu4 <- ggplot() +
                     values = colors, levels(hu4s$pctnotil_cat)) + 
   geom_sf(data = states, alpha = 0, size = 0.5) +
   coord_sf(datum = NA) +
+  scalebar(hu4s, dd2km = FALSE, dist = 320, 
+           st.size = 1, border.size = 0.3) +
+  north(hu4s, symbol = 2, scale = 0.15, 
+        anchor = c(x = 1800000, y = 1800000)) +
+  theme(axis.title = element_blank()) +
   theme_opts
+
 legend <- get_legend(g_hu8)
 
 plot_grid(g_counties + theme(legend.position = "none") + ggtitle("A. County") + 
