@@ -16,7 +16,7 @@ knitr::opts_chunk$set(echo = TRUE, fig.path = "../figures/", fig.width = 5, fig.
 knitr::include_graphics("../figures/01_size-comparison-1.pdf")
 ```
 
-```{r tillage_map, fig.cap="Conservation tillage A) dissagregated to counties, B) at the original subbasin scale, C) aggregated to subregions. ", echo=FALSE, out.height = "6in"}
+```{r tillage_map, fig.cap="Conservation tillage A) disaggregated to counties, B) at the original subbasin scale, C) aggregated to subregions. ", echo=FALSE, out.height = "6in"}
 knitr::include_graphics("../figures/02_tillage_map-1.pdf")
 ```
 
