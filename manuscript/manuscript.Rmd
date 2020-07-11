@@ -83,7 +83,7 @@ biblio-style: jsta
 watermark: true
 
 # Customize footer, eg by referencing the vignette
-footer_contents: "Geometric lake depth models and bathymetry"
+footer_contents: "Change of scale and information loss"
 
 # Produce a pinp document
 output: pinp::pinp
