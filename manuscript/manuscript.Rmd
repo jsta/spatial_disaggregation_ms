@@ -1,0 +1,141 @@
+---
+title: How does change of scale affect information loss and spatial autocorrelation?
+
+# Use letters for affiliations
+author:
+  - name: Joseph Stachelek
+    affiliation: a
+  
+address:
+  - code: a
+    address: Department of Fisheries and Wildlife, Michigan State University, 480 Wilson Rd., East Lansing, MI 48824, USA
+  
+# Optional: line of arbitrary text with additional information.
+# Could be used, for example, to mention the bibliographic info in a post-print.
+# If not specified, defaults to "This version was compiled on \today"
+#date_subtitle: Published in *Journal of Statistical Software*, 2018
+# date_subtitle: > 
+# This is the accepted version of the following article: J. Stachelek et al., Ecological Applications. In Press, which has been published in final form at DOI:  [DOI](https://doi.org).  This article may be used for non-commercial purposes in accordance with Wiley Terms and Conditions for Use of Self-Archived Versions.
+
+# For footer text  TODO(fold into template, allow free form two-authors)
+lead_author_surname: Stachelek et al.
+
+# Place eg a DOI URL or CRAN Package URL here
+# doi_footer: "https://doi.org/10.5281/zenodo.3754916"
+
+# Abstract
+abstract: |
+  Aim: Broad scale studies in ecology often struggle dealing with spatial misalignment of predictor variables. Correcting spatial misalignment can be accomplished either by aggregating data from smaller to larger spatial units or by disaggregating data from larger to smaller spatial units. Spatial aggregation is generally discouraged because it is necessarily accompanied by a loss of information. However, the extent to which disaggregated products retain the characteristics of the original data is unknown. 
+  \vspace{0.5em}
+   
+  Location: Upper Midwest and Northeast U.S.A.
+  \vspace{0.5em}
+  
+  Time period: 2004
+  \vspace{0.5em}
+  
+  Methods: Here, I sought to compare and contrast cross-scale relationships as measured with either aggregated or disaggregated data. I used data on percentage of cropland managed for conservation tillage measured at the subbasin spatial scale to calculate a synthetic “response” variable y with a linear positive relationship to conservation tillage. Then, I aggregated and disaggregated the original estimates of conservation tillage to the subregion and county spatial scales respectively. I examined how these cross-scale transformation procedures affected the relationship between conservation tillage and the synthetic variable y as well as their spatial autocorrelation characteristics.
+  \vspace{0.1em}
+  
+  Results: The strongest relationship between conservation tillage and y was at the original subbasin scale. Substituting disaggregated estimates of conservation tillage slightly decreased the strength of this relationship while substituting aggregated estimates dramatically decreased its strength. Spatial autocorrelation of both conservation tillage and y at the subbasin scale was similar to disaggregated results as the county level but was substantially stronger than aggregated results at the subregion scale.
+  \vspace{0.5em}
+  
+  Main conclusions: Disaggregation appears to be a valid procedure in my study because disaggregated data retained the relationships with response variables and retained its spatial autocorrelation characteristics. Nevertheless, future studies considering disaggregation should account for the extent of polygon sizing mismatches, the magnitude of the change in scale, and whether the dataset contains missing data entries. 
+
+# Optional: Acknowledgements
+acknowledgements: |
+  Funding was provided by the US NSF Macrosystems Biology Program grants, DEB-1638679; DEB-1638550, DEB-1638539, DEB-1638554. Author contributions: JS conceived of the study, built models, analyzed data, and wrote the paper.
+
+# Optional: One or more keywords
+keywords:
+  - keyword 1
+  - keyword 2
+
+# Paper size for the document, values of letter and a4
+papersize: letter
+
+# Font size of the document, values of 9pt (default), 10pt, 11pt and 12pt
+fontsize: 9pt
+
+# Optional: Force one-column layout, default is two-column
+#one_column: true
+
+# Optional: Enables lineno mode, but only if one_column mode is also true
+#lineno: true
+
+# Optional: Enable one-sided layout, default is two-sided
+#one_sided: true
+
+# Optional: Enable section numbering, default is unnumbered
+#numbersections: true
+
+# Optional: Specify the depth of section number, default is 5
+#secnumdepth: 5
+
+# Optional: Skip inserting final break between acknowledgements, default is false
+skip_final_break: true
+
+# Optional: Bibliography 
+bibliography: spatialdisag
+biblio-style: jsta
+
+# Optional: Enable a 'Draft' watermark on the document
+watermark: true
+
+# Customize footer, eg by referencing the vignette
+footer_contents: "Geometric lake depth models and bathymetry"
+
+# Produce a pinp document
+output: pinp::pinp
+
+# Required: Vignette metadata for inclusion in a package.
+vignette: >
+  %\VignetteIndexEntry{YourPackage-vignetteentry}
+  %\VignetteKeywords{YourPackage, r, anotherkeyword}
+  %\VignettePackage{YourPackage}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+
+## INTRODUCTION
+
+Broad-scale ecological studies often use a modelling strategy where individual point observations are related to predictor variables measured at a variety of scales. For example, Tran and Waller (2015) modelled Lyme disease incidence against covariates measured at a combination of county, state, and region levels. Another example is that of Oliver et al. (2016) where lake depth was modelled as a function of covariates measured at both the watershed and subbasin scales. 
+
+These examples represent the typical case where a combination of predictor variables measured at a variety of spatial scales are simply used at the scale at which they were originally measured. However, more complex cases arise when predictor variables are subjected to a change in scale whether by aggregating to larger spatial units or disaggregating to smaller spatial units (i.e. areal interpolation). Such change-in-scale operations may be necessary either to combine predictor variables prior to calculating derived metrics or to generate dense spatiotemporal grids from temporally sparse remote sensing data (Stein et al. 2001). One example of such a use case is described in Zhu et al. (2013) where temperature data was disaggregated from a 480m grid to a 60m grid to support fine-scale spatiotemporal modelling. 
+
+Change of scale operations involving disaggregation may be particularly necessary in cases where resolving details at specific scale of interest is important. For example, coarse areal data at the farm level may need to be disaggregated to the field level (Stein et al. 2001).  Sometimes such disaggregation procedures are more complex than simply weighting by area because they consider other covariates. These more complex procedures are known as dasymetric interpolation in cases where ancillary data is used to supplement simple weighting by area (Eicher & Brewer 2001). 
+
+Studies evaluating the accuracy of areal interpolation have a long history in geography (See review by Atkinson 2013). In particular, such studies have found that spatial aggregation often results in errors because it is necessarily accompanied by a loss of information. This phenomena of aggregation induced change of scale errors is known as the modifiable areal unit problem (MAUP, Openshaw 1984). Although aggregation induced errors are well-known, a less well-studied issue is that of spatial disaggregation or downscaling. Does downscaling via area-weighted interpolation cause similar errors and loss of information as spatial aggregation?
+
+To answer this knowledge gap, I examine whether spatial disaggregation of areal data affects cross-scale relationships in the same way as spatial aggregation as far as the strength and direction of its relationship a synthetic covariate. I also compared the spatial autocorrelation characteristics of aggregated and disaggregated data to screen for potential issues with using cross scale data.
+
+## METHODS
+
+The specific data I used for my study was the percentage of cropland managed under a conservation tillage strategy in the United States in 2004 as calculated by Baker (2011). This data was originally sourced from the Conservation Technology Information Center (CTIC). In its original form, the CTIC data was gathered at the county scale. Baker (2011) aggregated this county level data to a larger watershed subbasin (HUC8) scale (USGS 2013). Although, the original CTIC data was gathered at the county level, this data has not been made publicly available. I used subbasin and subregion polygon layers from the LAGOSNEgis data product as units of spatial analysis (Soranno & Cheruvelil 2017). They originate from the USGS (2013) water boundary dataset and are clipped to the US national borders.
+
+I tested the effects of spatial aggregation and disaggregation by re-calculating conservation tillage at the larger subregion (HUC4) scale and at the smaller county scale. Next, I generated a synthetic “response” variable y as a linear increasing function of conservation tillage at the HUC8 level plus some randomly distributed noise. Finally, I calculated both the linear relationship and spatial autocorrelation between y and conservation tillage at each spatial scale. 
+
+I calculated spatially aggregated and disaggregated data using the area-weighted interpolation function of the sf R package (Pebesma 2018). I examined spatial autocorrelation of both y and conservation tillage using variograms calculated using the gstat R package (Pebesma 2004, Graler et al. 2016). 
+
+## RESULTS
+
+An important point to consider in when performing areal interpolation is the extent of overlap among polygon layers because this is a rough approximation of sample size. In my study, most but not all subbasin polygons were larger than county polygons (Figure 1). At median polygon size approximately 2 counties fit within a single subbasin and approximately 9 subbasins fit within a single subregion.
+
+When I disaggregated conservation tillage from the subbasin to the county scale, it was qualitatively similar to Baker (2011). For example, the northern portions of the study area appear to have low conservation tillage while the southern portions appear to have high conservation tillage (Figure 2a). There are however important differences in the level of detail within individual areas. In particular, Pennsylvania, New York, and Illinois appeared to have a greatly reduced within-state variability. For example, county level results for Illinois lack any low values of conservation tillage while there are clearly low conservation tillage counties in the original data published by Baker (2011). As expected, aggregating conservation tillage to the subregion scale caused a substantial loss of detail (Figure 2c). In general, values were pushed towards the mean whereby areas of both high and low conservation tillage appear instead as medium conservation tillage (Figure 2c).
+
+The overall relationship between y and conservation tillage at the aggregated subregion scale and at the disaggregated county scales was qualitatively similar to original subbasin relationship (Figure 3). However, there were quantitative differences in the strength of these relationships. The coefficient of determination (R2) for the subbasin model was 0.71 while it was 0.64 and 0.54 for the disaggregated and aggregated models respectively. All linear models were statistically significant at p < 0.01.  
+
+Both conservation tillage and y appeared to be spatially autocorrelated at the original subbasin scale (Figure 4b). The range, sill, and nugget of the conservation tillage variogram at this scale was approximately 190,000 m2, 149, and 0 respectively. For y, the range, sill, and nugget was 183,500 m2, 270, and 107. In contrast, the variogram for conservation tillage at the aggregated subregion scale appeared to be nearly flat indicating a substantial decrease in spatial autocorrelation (Figure 4c). Here, the range, sill, and nugget of the conservation tillage variogram was approximately 507,000 m2, 125, and 13.6 respectively while for y it was 107,000 m2, 245, and 0. In contrast to variograms fit to aggregated data, variograms of disaggregated county level data did not appear to be substantially different from the original data. Here, the range, sill, and nugget of the conservation tillage variogram was approximately 226, 000 m2, 135, and 0 respectively while for y it was 118, 000 m2, 247, and 65. 
+
+In the subbasin and county scale variograms, the inherent non-spatial variation (i.e. the nugget) for y was higher than for conservation tillage. However, at the aggregated subregion scale it was conservation tillage that had a higher non-spatial variation. In all cases, the range of spatial autocorrelation for conservation tillage was larger than for y.  The difference in the conservation tillage and y estimates was smallest at the subbasin scale, it increased somewhat at the county scale, and it increased substantially at the subregion scale. 
+
+## DISCUSSION
+
+In my study, disaggregation of conservation tillage from the subbasin to the county level appeared to retain the original relationship with the synthetic variable y. Similarly, disaggregated conservation tillage retained most of its spatial autocorrelation characteristics. One exception was the spatial autocorrelation range which appeared to be somewhat overestimated. Although disaggregation appeared to be a valid procedure for resolving spatial mismatches, there are several characteristics that make my study unique and may need to be considered in future studies. 
+
+One of these characteristics is the relative sizing of spatial units. In my study, county areas were approximately half as large as subbasins. Depending on the specific variable of interest, this may be considered a modest difference in size. In my study, the fact that there was a small difference in change of scale may explain why disaggregation worked with little apparent error.  Previous studies using disaggregation have used a change of scale anywhere from 8:1 (Zhu et al. 2013) to 1000000:1 (Stein et al. 2001). It is likely that the greater the change in scale the stronger the rationale for using ancillary data in a dasymetric interpolation framework. Indeed, such a dasymetric interpolation strategy was used by Stein et al. (2001) where the change of scale was quite large. 
+
+Another thing to consider is that my study used areal data (e.g. in data from discrete polygons) as source data. Other studies may use gridded raster products where coverage is more evenly spaced. Change of scale using gridded raster products may require special consideration because it gives the appearance of complete coverage despite the fact that there is not complete information (Atkinson 2013).
+
+Yet another point of consideration is nesting or lack of nesting in the spatial units being used for aggregation or disaggregation. In my study, subbasins were fully nested within subregions during aggregation but counties were not fully nested within subbasins during disaggregation. In general, most areal interpolation studies use a fully nested strategy. In part, this is likely because it simplifies issues of missing data and partial overlaps (Mrozinski & Cromley 1999). For instance, Eicher & Brewer (2001) used counties nested within census blocks and Stein et al. (2001) used fields nested within farms. By comparison, studies using non-nested spatial units for change of scale are likely more rare. One reason for the relative abundance of studies using nested spatial units may be that they provide the ability to conduct real world tests of change of scale accuracy. By comparison, studies using non-nested spatial units would need to collect data within multiple spatial units in order to conduct an accuracy assessment. Another disadvantage of a non-nested design is that non-nested spatial units create slivers of missing data (Mrozinski & Cromley 1999). This can be seen in Baker (2011) where subbasin aggregation using smaller counties covered a larger extent than on the original county map whereas subbasin aggregation using larger counties covered a smaller extent. 
+
+Here, I have shown that spatial disaggregation appears to retain relationships with cross-scale response variables as well as spatial autocorrelation characteristics. Future studies should consider disaggregation to deal with spatial misalignment. However, such studies should include an evaluation of spatial unit mismatch (i.e. full or partial nesting), the magnitude of the change in scale, and whether the dataset contains missing data entries. In such cases, it may be useful to implement a more complex disaggregation technique using dasymetric interpolation or constrained area interpolation.
